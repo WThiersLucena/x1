@@ -1,0 +1,231 @@
+<div class="categorias-component">
+  <!-- Cabeçalho -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h6 class="m-0">Gerenciar Categorias</h6>
+    <button
+      class="btn btn-outline-primary btn-sm"
+      (click)="abrirModalNovo()"
+    >
+      <i class="bi bi-plus-lg"></i> Nova Categoria
+    </button>
+  </div>
+
+  <!-- Barra de busca e filtros -->
+  <div class="row mb-3">
+    <div class="col-md-6">
+      <div class="input-group">
+        <input
+          type="text"
+          class="form-control"
+          placeholder="Buscar por nome..."
+          [value]="busca()"
+          (input)="busca.set($any($event.target).value)"
+          (keyup.enter)="onBuscar()"
+        />
+        <button
+          class="btn btn-outline-secondary"
+          type="button"
+          (click)="onBuscar()"
+          title="Buscar"
+        >
+          <i class="bi bi-search"></i>
+        </button>
+        <button
+          class="btn btn-outline-secondary"
+          type="button"
+          (click)="limparBusca()"
+          title="Limpar busca"
+          *ngIf="busca()"
+        >
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="btn-group" role="group">
+        <button
+          type="button"
+          class="btn btn-sm"
+          [class.btn-primary]="filtroAtivos() === null"
+          [class.btn-outline-primary]="filtroAtivos() !== null"
+          (click)="filtrarPorStatus(null)"
+        >
+          Todos
+        </button>
+        <button
+          type="button"
+          class="btn btn-sm"
+          [class.btn-success]="filtroAtivos() === true"
+          [class.btn-outline-success]="filtroAtivos() !== true"
+          (click)="filtrarPorStatus(true)"
+        >
+          Ativas
+        </button>
+        <button
+          type="button"
+          class="btn btn-sm"
+          [class.btn-secondary]="filtroAtivos() === false"
+          [class.btn-outline-secondary]="filtroAtivos() !== false"
+          (click)="filtrarPorStatus(false)"
+        >
+          Inativas
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="isLoading()" class="text-center text-muted py-3">
+    <div class="spinner-border spinner-border-sm" role="status">
+      <span class="visually-hidden">Carregando...</span>
+    </div>
+    <p class="mt-2 mb-0">Carregando categorias...</p>
+  </div>
+
+  <!-- Lista vazia -->
+  <div
+    *ngIf="!isLoading() && categorias().length === 0"
+    class="alert alert-info"
+  >
+    ℹ️ Nenhuma categoria encontrada.
+  </div>
+
+  <!-- Tabela -->
+  <div
+    class="table-responsive"
+    *ngIf="!isLoading() && categorias().length > 0"
+  >
+    <table class="table table-striped align-middle">
+      <thead>
+        <tr>
+          <th>Nome</th>
+          <th>Descrição</th>
+          <th>Status</th>
+          <th width="180" class="text-center">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let categoria of categorias()">
+          <td>
+            <div class="fw-semibold">{{ categoria.nome }}</div>
+          </td>
+          <td>{{ categoria.descricao || "-" }}</td>
+          <td>
+            <span
+              class="badge"
+              [class.bg-success]="categoria.ativa"
+              [class.bg-secondary]="!categoria.ativa"
+            >
+              {{ categoria.ativa ? "Ativa" : "Inativa" }}
+            </span>
+          </td>
+          <td class="text-center">
+            <button
+              class="btn btn-sm btn-outline-primary me-1"
+              (click)="abrirModalEditar(categoria)"
+              title="Editar"
+            >
+              ✏️
+            </button>
+            <button
+              *ngIf="categoria.ativa"
+              class="btn btn-sm btn-outline-warning me-1"
+              (click)="desativar(categoria.id!)"
+              title="Desativar"
+            >
+              ⏸️
+            </button>
+            <button
+              *ngIf="!categoria.ativa"
+              class="btn btn-sm btn-outline-success me-1"
+              (click)="ativar(categoria.id!)"
+              title="Ativar"
+            >
+              ▶️
+            </button>
+            <button
+              class="btn btn-sm btn-outline-danger"
+              (click)="excluir(categoria.id!)"
+              title="Excluir"
+            >
+              🗑️
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Modal -->
+<div
+  class="modal fade"
+  [class.show]="showModal()"
+  [style.display]="showModal() ? 'block' : 'none'"
+  tabindex="-1"
+  role="dialog"
+>
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          {{ editId() !== null ? "Editar" : "Nova" }} Categoria
+        </h5>
+        <button
+          type="button"
+          class="btn-close"
+          (click)="fecharModal()"
+          aria-label="Close"
+        ></button>
+      </div>
+      <form [formGroup]="form" (ngSubmit)="salvar()">
+        <div class="modal-body">
+          <div class="row g-3">
+            <div class="col-12">
+              <label class="form-label">Nome *</label>
+              <input
+                type="text"
+                class="form-control"
+                formControlName="nome"
+                [class.is-invalid]="
+                  form.get('nome')?.invalid && form.get('nome')?.touched
+                "
+              />
+            </div>
+            <div class="col-12">
+              <label class="form-label">Descrição</label>
+              <textarea
+                class="form-control"
+                formControlName="descricao"
+                rows="3"
+              ></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            (click)="fecharModal()"
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            class="btn btn-primary"
+            [disabled]="!form.valid"
+          >
+            Salvar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<div
+  *ngIf="showModal()"
+  class="modal-backdrop fade show"
+  (click)="fecharModal()"
+></div>
+
+

@@ -1,0 +1,1256 @@
+<section class="page account account-container py-4">
+  <div class="container-fluid px-4">
+    <div class="d-flex align-items-center justify-content-between mb-3">
+      <h1 class="mb-0">Minha Conta</h1>
+      <button
+        type="button"
+        class="btn btn-outline-secondary btn-toggle-menu"
+        (click)="toggleMenu()"
+        [title]="menuAberto() ? 'Fechar menu' : 'Abrir menu'"
+        [attr.aria-label]="menuAberto() ? 'Fechar menu' : 'Abrir menu'"
+        [attr.aria-expanded]="menuAberto()"
+      >
+        <span [class.rotated]="!menuAberto()">☰</span>
+      </button>
+    </div>
+
+    <div class="row g-3">
+      <!-- MENU LATERAL -->
+      <aside
+        class="col-12"
+        [class.col-lg-2]="menuAberto()"
+        [class.col-xl-2]="menuAberto()"
+        [class.menu-fechado]="!menuAberto()"
+      >
+        <nav class="a-sidemenu" [class.menu-hidden]="!menuAberto()">
+          <button
+            type="button"
+            class="a-sidemenu__item"
+            [class.is-active]="section() === 'orders'"
+            (click)="setSection('orders')"
+          >
+            Meus Pedidos
+          </button>
+          <button
+            type="button"
+            class="a-sidemenu__item"
+            [class.is-active]="section() === 'cart'"
+            (click)="setSection('cart')"
+          >
+            Carrinho
+          </button>
+          <button
+            type="button"
+            class="a-sidemenu__item"
+            [class.is-active]="section() === 'profile'"
+            (click)="setSection('profile')"
+          >
+            Meus Dados
+          </button>
+
+          <!-- Painel Administrativo com Acordeons -->
+          <div class="a-sidemenu__admin-section" *ngIf="canAccessAdmin()">
+            <button
+              type="button"
+              class="a-sidemenu__item a-sidemenu__item--admin"
+              [class.is-active]="section() === 'admin' && !subsection()"
+              (click)="toggleAdmin()"
+            >
+              🛠️ Painel Administrativo
+              <span class="a-sidemenu__accordion-icon ms-auto">
+                {{ adminExpandido() ? "▼" : "▶" }}
+              </span>
+            </button>
+
+            <!-- Acordeon: Fornecedores -->
+            <div
+              class="a-sidemenu__accordion"
+              *ngIf="section() === 'admin' && adminExpandido()"
+            >
+              <button
+                type="button"
+                class="a-sidemenu__accordion-header"
+                (click)="toggleAccordion('fornecedores')"
+                [attr.aria-expanded]="accordionAberto('fornecedores')"
+              >
+                <span>🏭 Fornecedores</span>
+                <span class="a-sidemenu__accordion-icon">
+                  {{ accordionAberto("fornecedores") ? "▼" : "▶" }}
+                </span>
+              </button>
+              <div
+                class="a-sidemenu__accordion-content"
+                [class.is-open]="accordionAberto('fornecedores')"
+              >
+                <button
+                  type="button"
+                  class="a-sidemenu__subitem"
+                  [class.is-active]="subsection() === 'fornecedores'"
+                  (click)="setSection('admin'); setSubsection('fornecedores')"
+                >
+                  Gerenciar Fornecedores
+                </button>
+              </div>
+            </div>
+
+            <!-- Acordeon: Categorias -->
+            <div
+              class="a-sidemenu__accordion"
+              *ngIf="section() === 'admin' && adminExpandido()"
+            >
+              <button
+                type="button"
+                class="a-sidemenu__accordion-header"
+                (click)="toggleAccordion('categorias')"
+                [attr.aria-expanded]="accordionAberto('categorias')"
+              >
+                <span>📁 Categorias</span>
+                <span class="a-sidemenu__accordion-icon">
+                  {{ accordionAberto("categorias") ? "▼" : "▶" }}
+                </span>
+              </button>
+              <div
+                class="a-sidemenu__accordion-content"
+                [class.is-open]="accordionAberto('categorias')"
+              >
+                <button
+                  type="button"
+                  class="a-sidemenu__subitem"
+                  [class.is-active]="subsection() === 'categorias'"
+                  (click)="setSection('admin'); setSubsection('categorias')"
+                >
+                  Gerenciar Categorias
+                </button>
+              </div>
+            </div>
+
+            <!-- Acordeon: Subcategorias -->
+            <div
+              class="a-sidemenu__accordion"
+              *ngIf="section() === 'admin' && adminExpandido()"
+            >
+              <button
+                type="button"
+                class="a-sidemenu__accordion-header"
+                (click)="toggleAccordion('subcategorias')"
+                [attr.aria-expanded]="accordionAberto('subcategorias')"
+              >
+                <span>📂 Subcategorias</span>
+                <span class="a-sidemenu__accordion-icon">
+                  {{ accordionAberto("subcategorias") ? "▼" : "▶" }}
+                </span>
+              </button>
+              <div
+                class="a-sidemenu__accordion-content"
+                [class.is-open]="accordionAberto('subcategorias')"
+              >
+                <button
+                  type="button"
+                  class="a-sidemenu__subitem"
+                  [class.is-active]="subsection() === 'subcategorias'"
+                  (click)="setSection('admin'); setSubsection('subcategorias')"
+                >
+                  Gerenciar Subcategorias
+                </button>
+              </div>
+            </div>
+
+            <!-- Acordeon: Segmentos -->
+            <div
+              class="a-sidemenu__accordion"
+              *ngIf="section() === 'admin' && adminExpandido()"
+            >
+              <button
+                type="button"
+                class="a-sidemenu__accordion-header"
+                (click)="toggleAccordion('segmentos')"
+                [attr.aria-expanded]="accordionAberto('segmentos')"
+              >
+                <span>🏷️ Segmentos</span>
+                <span class="a-sidemenu__accordion-icon">
+                  {{ accordionAberto("segmentos") ? "▼" : "▶" }}
+                </span>
+              </button>
+              <div
+                class="a-sidemenu__accordion-content"
+                [class.is-open]="accordionAberto('segmentos')"
+              >
+                <button
+                  type="button"
+                  class="a-sidemenu__subitem"
+                  [class.is-active]="subsection() === 'segmentos'"
+                  (click)="setSection('admin'); setSubsection('segmentos')"
+                >
+                  Gerenciar Segmentos
+                </button>
+              </div>
+            </div>
+
+            <!-- Acordeon: Produtos -->
+            <div
+              class="a-sidemenu__accordion"
+              *ngIf="section() === 'admin' && adminExpandido()"
+            >
+              <button
+                type="button"
+                class="a-sidemenu__accordion-header"
+                (click)="toggleAccordion('produtos')"
+                [attr.aria-expanded]="accordionAberto('produtos')"
+              >
+                <span>🛍️ Produtos</span>
+                <span class="a-sidemenu__accordion-icon">
+                  {{ accordionAberto("produtos") ? "▼" : "▶" }}
+                </span>
+              </button>
+              <div
+                class="a-sidemenu__accordion-content"
+                [class.is-open]="accordionAberto('produtos')"
+              >
+                <button
+                  type="button"
+                  class="a-sidemenu__subitem"
+                  [class.is-active]="subsection() === 'produtos'"
+                  (click)="setSection('admin'); setSubsection('produtos')"
+                >
+                  Gerenciar Produtos
+                </button>
+              </div>
+            </div>
+
+            <!-- Acordeon: Carrossel Destaque -->
+            <div
+              class="a-sidemenu__accordion"
+              *ngIf="section() === 'admin' && adminExpandido()"
+            >
+              <button
+                type="button"
+                class="a-sidemenu__accordion-header"
+                (click)="toggleAccordion('carrossel')"
+                [attr.aria-expanded]="accordionAberto('carrossel')"
+              >
+                <span>🎠 Carrossel</span>
+                <span class="a-sidemenu__accordion-icon">
+                  {{ accordionAberto("carrossel") ? "▼" : "▶" }}
+                </span>
+              </button>
+              <div
+                class="a-sidemenu__accordion-content"
+                [class.is-open]="accordionAberto('carrossel')"
+              >
+                <button
+                  type="button"
+                  class="a-sidemenu__subitem"
+                  [class.is-active]="subsection() === 'carrossel'"
+                  (click)="setSection('admin'); setSubsection('carrossel')"
+                >
+                  Gerenciar Carrossel
+                </button>
+              </div>
+            </div>
+
+            <!-- Acordeon: Estoque -->
+            <div
+              class="a-sidemenu__accordion"
+              *ngIf="section() === 'admin' && adminExpandido()"
+            >
+              <button
+                type="button"
+                class="a-sidemenu__accordion-header"
+                (click)="toggleAccordion('estoque')"
+                [attr.aria-expanded]="accordionAberto('estoque')"
+              >
+                <span>📦 Estoque</span>
+                <span class="a-sidemenu__accordion-icon">
+                  {{ accordionAberto("estoque") ? "▼" : "▶" }}
+                </span>
+              </button>
+              <div
+                class="a-sidemenu__accordion-content"
+                [class.is-open]="accordionAberto('estoque')"
+              >
+                <button
+                  type="button"
+                  class="a-sidemenu__subitem"
+                  [class.is-active]="subsection() === 'estoque'"
+                  (click)="setSection('admin'); setSubsection('estoque')"
+                >
+                  Gerenciar Estoque
+                </button>
+              </div>
+            </div>
+
+            <!-- Acordeon: Dashboard -->
+            <div
+              class="a-sidemenu__accordion"
+              *ngIf="section() === 'admin' && adminExpandido()"
+            >
+              <button
+                type="button"
+                class="a-sidemenu__accordion-header"
+                (click)="toggleAccordion('dashboard')"
+                [attr.aria-expanded]="accordionAberto('dashboard')"
+              >
+                <span>📊 Dashboard</span>
+                <span class="a-sidemenu__accordion-icon">
+                  {{ accordionAberto("dashboard") ? "▼" : "▶" }}
+                </span>
+              </button>
+              <div
+                class="a-sidemenu__accordion-content"
+                [class.is-open]="accordionAberto('dashboard')"
+              >
+                <button
+                  type="button"
+                  class="a-sidemenu__subitem"
+                  [class.is-active]="subsection() === 'dashboard'"
+                  (click)="setSection('admin'); setSubsection('dashboard')"
+                >
+                  Ver Dashboard
+                </button>
+              </div>
+            </div>
+          </div>
+        </nav>
+      </aside>
+
+      <!-- CONTEÚDO PRINCIPAL -->
+      <div
+        class="col-12"
+        [class.col-lg-10]="menuAberto()"
+        [class.col-xl-10]="menuAberto()"
+        [class.col-lg-12]="!menuAberto()"
+        [class.col-xl-12]="!menuAberto()"
+      >
+        <!-- MEUS PEDIDOS -->
+        <div class="a-panel" *ngIf="section() === 'orders'">
+          <h2 class="h5 mb-3">Meus Pedidos</h2>
+
+          <!-- Loading -->
+          <div *ngIf="isLoadingPedidos()" class="text-center py-4">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Carregando...</span>
+            </div>
+            <p class="mt-2 text-muted">Carregando seus pedidos...</p>
+          </div>
+
+          <!-- Lista vazia -->
+          <div
+            *ngIf="!isLoadingPedidos() && pedidos().length === 0"
+            class="alert alert-info"
+          >
+            <p class="mb-0">Nenhum pedido realizado ainda.</p>
+          </div>
+
+          <!-- Lista de Pedidos -->
+          <div *ngIf="!isLoadingPedidos() && pedidos().length > 0">
+            <div class="accordion" id="accordionPedidos">
+              <div
+                *ngFor="let pedido of pedidos(); let i = index"
+                class="accordion-item"
+              >
+                <h2 class="accordion-header" [id]="'heading' + pedido.id">
+                  <button
+                    class="accordion-button"
+                    type="button"
+                    [class.collapsed]="i !== 0"
+                    [attr.data-bs-toggle]="'collapse'"
+                    [attr.data-bs-target]="'#collapse' + pedido.id"
+                    [attr.aria-expanded]="i === 0 ? 'true' : 'false'"
+                    [attr.aria-controls]="'collapse' + pedido.id"
+                  >
+                    <div
+                      class="d-flex justify-content-between align-items-center w-100 me-3"
+                    >
+                      <div>
+                        <strong
+                          >Pedido {{ pedido.numeroPedido || pedido.id }}</strong
+                        >
+                        <span
+                          class="badge ms-2"
+                          [ngClass]="getStatusBadgeClass(pedido.status)"
+                        >
+                          {{ traduzirStatus(pedido.status) }}
+                        </span>
+                      </div>
+                      <div class="text-end">
+                        <div class="fw-bold text-success">
+                          {{ formatarValor(pedido.valorTotal) }}
+                        </div>
+                        <div class="small text-muted">
+                          {{ pedido.dataPedido | date : "dd/MM/yyyy HH:mm" }}
+                        </div>
+                      </div>
+                    </div>
+                  </button>
+                </h2>
+                <div
+                  [id]="'collapse' + pedido.id"
+                  class="accordion-collapse collapse"
+                  [class.show]="i === 0"
+                  [attr.aria-labelledby]="'heading' + pedido.id"
+                  data-bs-parent="#accordionPedidos"
+                >
+                  <div class="accordion-body">
+                    <!-- Informações do Pedido -->
+                    <div class="row mb-4">
+                      <div class="col-md-6">
+                        <h6 class="fw-bold mb-3">Informações do Pedido</h6>
+                        <table class="table table-sm">
+                          <tbody>
+                            <tr>
+                              <td class="fw-semibold">Número do Pedido:</td>
+                              <td>{{ pedido.numeroPedido || pedido.id }}</td>
+                            </tr>
+                            <tr>
+                              <td class="fw-semibold">Data do Pedido:</td>
+                              <td>
+                                {{
+                                  pedido.dataPedido | date : "dd/MM/yyyy HH:mm"
+                                }}
+                              </td>
+                            </tr>
+                            <tr>
+                              <td class="fw-semibold">Forma de Pagamento:</td>
+                              <td>
+                                {{
+                                  traduzirFormaPagamento(pedido.formaPagamento)
+                                }}
+                              </td>
+                            </tr>
+                            <tr>
+                              <td class="fw-semibold">Status:</td>
+                              <td>
+                                <span
+                                  class="badge"
+                                  [ngClass]="getStatusBadgeClass(pedido.status)"
+                                >
+                                  {{ traduzirStatus(pedido.status) }}
+                                </span>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td class="fw-semibold">Subtotal:</td>
+                              <td>{{ formatarValor(pedido.subtotal) }}</td>
+                            </tr>
+                            <tr *ngIf="pedido.valorFrete > 0">
+                              <td class="fw-semibold">Frete:</td>
+                              <td>{{ formatarValor(pedido.valorFrete) }}</td>
+                            </tr>
+                            <tr *ngIf="pedido.valorDesconto > 0">
+                              <td class="fw-semibold">Desconto:</td>
+                              <td class="text-success">
+                                -{{ formatarValor(pedido.valorDesconto) }}
+                              </td>
+                            </tr>
+                            <tr>
+                              <td class="fw-semibold">Total:</td>
+                              <td class="fw-bold text-success">
+                                {{ formatarValor(pedido.valorTotal) }}
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                      <div class="col-md-6">
+                        <h6 class="fw-bold mb-3">Endereço de Entrega</h6>
+                        <div
+                          *ngIf="pedido.enderecoCompleto"
+                          class="p-3 bg-light rounded"
+                        >
+                          <p class="mb-0">{{ pedido.enderecoCompleto }}</p>
+                        </div>
+                        <div
+                          *ngIf="!pedido.enderecoCompleto"
+                          class="text-muted"
+                        >
+                          Endereço não disponível
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Observações -->
+                    <div *ngIf="pedido.observacoes" class="mb-4">
+                      <h6 class="fw-bold mb-2">Observações</h6>
+                      <p class="mb-0 p-3 bg-light rounded">
+                        {{ pedido.observacoes }}
+                      </p>
+                    </div>
+
+                    <!-- Itens do Pedido -->
+                    <div>
+                      <h6 class="fw-bold mb-3">Itens do Pedido</h6>
+                      <div class="table-responsive">
+                        <table class="table table-bordered">
+                          <thead class="table-light">
+                            <tr>
+                              <th>Produto</th>
+                              <th class="text-center">Quantidade</th>
+                              <th class="text-end">Valor Unitário</th>
+                              <th class="text-end">Subtotal</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr *ngFor="let item of pedido.itens">
+                              <td>
+                                <div class="d-flex align-items-center gap-2">
+                                  <img
+                                    *ngIf="item.produtoImagemUrl"
+                                    [src]="
+                                      formatarUrlImagem(item.produtoImagemUrl)
+                                    "
+                                    [alt]="item.produtoNome"
+                                    style="
+                                      width: 50px;
+                                      height: 50px;
+                                      object-fit: cover;
+                                      border-radius: 4px;
+                                    "
+                                    (error)="tratarErroImagem($event)"
+                                  />
+                                  <div>
+                                    <div class="fw-semibold">
+                                      {{ item.produtoNome || "Produto" }}
+                                    </div>
+                                    <div class="small text-muted">
+                                      ID: {{ item.produtoId }}
+                                    </div>
+                                  </div>
+                                </div>
+                              </td>
+                              <td class="text-center">{{ item.quantidade }}</td>
+                              <td class="text-end">
+                                {{ formatarValor(item.precoUnitario) }}
+                              </td>
+                              <td class="text-end fw-semibold">
+                                {{ formatarValor(item.subtotal) }}
+                              </td>
+                            </tr>
+                          </tbody>
+                          <tfoot>
+                            <tr>
+                              <td colspan="3" class="text-end fw-bold">
+                                Total:
+                              </td>
+                              <td class="text-end fw-bold text-success">
+                                {{ formatarValor(pedido.valorTotal) }}
+                              </td>
+                            </tr>
+                          </tfoot>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CARRINHO -->
+        <div class="a-panel" *ngIf="section() === 'cart'">
+          <h2 class="h5 mb-3">Carrinho</h2>
+          <div *ngIf="items.length === 0" class="text-center text-muted py-4">
+            Seu carrinho está vazio.
+          </div>
+          <div *ngIf="items.length > 0">
+            <table class="table align-middle">
+              <thead>
+                <tr>
+                  <th>Produto</th>
+                  <th>Preço</th>
+                  <th>Quantidade</th>
+                  <th>Subtotal</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let it of items">
+                  <td>
+                    <div class="d-flex align-items-center gap-2">
+                      <img
+                        [src]="it.imageUrl"
+                        [alt]="it.title"
+                        style="width: 50px; height: 50px; object-fit: cover"
+                      />
+                      <div>
+                        <div class="fw-semibold">{{ it.title }}</div>
+                        <div class="small text-muted">
+                          Tamanho: {{ it.size }}
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+                  <td>{{ it.price }}</td>
+                  <td>
+                    <div class="d-flex align-items-center gap-2">
+                      <button
+                        class="btn btn-sm btn-outline-secondary"
+                        (click)="decrement(it)"
+                      >
+                        −
+                      </button>
+                      <span>{{ it.quantity }}</span>
+                      <button
+                        class="btn btn-sm btn-outline-secondary"
+                        (click)="increment(it)"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </td>
+                  <td>R$ {{ subtotal(it).toFixed(2).replace(".", ",") }}</td>
+                  <td>
+                    <button
+                      class="btn btn-sm btn-outline-danger"
+                      (click)="remove(it)"
+                    >
+                      Remover
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td colspan="3" class="text-end fw-bold">Total:</td>
+                  <td class="fw-bold">
+                    R$ {{ total.toFixed(2).replace(".", ",") }}
+                  </td>
+                  <td></td>
+                </tr>
+              </tfoot>
+            </table>
+            <div class="d-flex justify-content-end mt-3">
+              <button class="btn btn-primary">Finalizar Compra</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- MEUS DADOS -->
+        <div class="a-panel" *ngIf="section() === 'profile'">
+          <h2 class="h5 mb-3">Meus Dados</h2>
+
+          <div class="accordion" id="accProfile">
+            <!-- ACCORDION: DADOS DO USUÁRIO -->
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="accUserDataH">
+                <button
+                  class="accordion-button"
+                  type="button"
+                  data-bs-toggle="collapse"
+                  data-bs-target="#accUserData"
+                  aria-expanded="true"
+                  aria-controls="accUserData"
+                >
+                  Dados Pessoais
+                </button>
+              </h2>
+              <div
+                id="accUserData"
+                class="accordion-collapse collapse show"
+                aria-labelledby="accUserDataH"
+                data-bs-parent="#accProfile"
+              >
+                <div class="accordion-body">
+                  <div class="table-responsive">
+                    <table class="table table-striped align-middle">
+                      <tbody>
+                        <tr>
+                          <td><strong>Nome</strong></td>
+                          <td>{{ userName() }}</td>
+                          <td rowspan="2" class="text-end align-middle">
+                            <button
+                              class="btn btn-outline-primary btn-sm"
+                              (click)="abrirModalUsuario()"
+                            >
+                              Editar
+                            </button>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td><strong>E-mail</strong></td>
+                          <td>{{ userEmail() }}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- ACCORDION: ENDEREÇOS -->
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="accAddressesH">
+                <button
+                  class="accordion-button collapsed"
+                  type="button"
+                  data-bs-toggle="collapse"
+                  data-bs-target="#accAddresses"
+                  aria-expanded="false"
+                  aria-controls="accAddresses"
+                >
+                  Endereços
+                </button>
+              </h2>
+              <div
+                id="accAddresses"
+                class="accordion-collapse collapse"
+                aria-labelledby="accAddressesH"
+                data-bs-parent="#accProfile"
+              >
+                <div class="accordion-body">
+                  <div
+                    class="d-flex justify-content-between align-items-center mb-3"
+                  >
+                    <h6 class="m-0">Gerenciar Endereços</h6>
+                    <button
+                      class="btn btn-outline-primary btn-sm"
+                      (click)="abrirModalNovoEndereco()"
+                    >
+                      <i class="bi bi-plus-lg"></i> Novo Endereço
+                    </button>
+                  </div>
+
+                  <div
+                    *ngIf="isLoadingEnderecos()"
+                    class="text-center text-muted py-3"
+                  >
+                    Carregando endereços...
+                  </div>
+
+                  <div
+                    *ngIf="!isLoadingEnderecos() && enderecos().length === 0"
+                    class="alert alert-info"
+                  >
+                    Nenhum endereço cadastrado.
+                  </div>
+
+                  <div class="table-responsive" *ngIf="enderecos().length > 0">
+                    <table class="table table-striped align-middle">
+                      <thead>
+                        <tr>
+                          <th>Endereço</th>
+                          <th>Tipo</th>
+                          <th class="text-end">Ações</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr *ngFor="let end of enderecos()">
+                          <td>
+                            <div class="fw-semibold">
+                              {{ end.logradouro }}, {{ end.numero }}
+                              <span *ngIf="end.complemento"
+                                >- {{ end.complemento }}</span
+                              >
+                            </div>
+                            <div class="small text-muted">
+                              {{ end.bairro }}, {{ end.cidade }} -
+                              {{ end.estado }}
+                            </div>
+                            <div class="small text-muted">
+                              CEP: {{ end.cep }}
+                            </div>
+                          </td>
+                          <td>
+                            <span class="badge bg-secondary">{{
+                              traduzirTipoEndereco(end.tipo)
+                            }}</span>
+                          </td>
+                          <td class="text-end">
+                            <button
+                              class="btn btn-outline-secondary btn-sm me-2"
+                              (click)="abrirModalEditarEndereco(end)"
+                            >
+                              Editar
+                            </button>
+                            <button
+                              class="btn btn-outline-danger btn-sm"
+                              (click)="excluirEndereco(end.id!)"
+                            >
+                              Remover
+                            </button>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- ACCORDION: TELEFONES -->
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="accPhonesH">
+                <button
+                  class="accordion-button collapsed"
+                  type="button"
+                  data-bs-toggle="collapse"
+                  data-bs-target="#accPhones"
+                  aria-expanded="false"
+                  aria-controls="accPhones"
+                >
+                  Telefones
+                </button>
+              </h2>
+              <div
+                id="accPhones"
+                class="accordion-collapse collapse"
+                aria-labelledby="accPhonesH"
+                data-bs-parent="#accProfile"
+              >
+                <div class="accordion-body">
+                  <div
+                    class="d-flex justify-content-between align-items-center mb-3"
+                  >
+                    <h6 class="m-0">Gerenciar Telefones</h6>
+                    <button
+                      class="btn btn-outline-primary btn-sm"
+                      (click)="abrirModalNovoTelefone()"
+                    >
+                      <i class="bi bi-plus-lg"></i> Novo Telefone
+                    </button>
+                  </div>
+
+                  <div
+                    *ngIf="isLoadingTelefones()"
+                    class="text-center text-muted py-3"
+                  >
+                    Carregando telefones...
+                  </div>
+
+                  <div
+                    *ngIf="!isLoadingTelefones() && telefones().length === 0"
+                    class="alert alert-info"
+                  >
+                    Nenhum telefone cadastrado.
+                  </div>
+
+                  <div class="table-responsive" *ngIf="telefones().length > 0">
+                    <table class="table table-striped align-middle">
+                      <thead>
+                        <tr>
+                          <th>Telefone</th>
+                          <th>Tipo</th>
+                          <th class="text-end">Ações</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr *ngFor="let tel of telefones()">
+                          <td>
+                            <div class="fw-semibold">
+                              {{ formatarTelefone(tel) }}
+                            </div>
+                          </td>
+                          <td>
+                            <span class="badge bg-secondary">{{
+                              traduzirTipoTelefone(tel.tipo)
+                            }}</span>
+                          </td>
+                          <td class="text-end">
+                            <button
+                              class="btn btn-outline-secondary btn-sm me-2"
+                              (click)="abrirModalEditarTelefone(tel)"
+                            >
+                              Editar
+                            </button>
+                            <button
+                              class="btn btn-outline-danger btn-sm"
+                              (click)="excluirTelefone(tel.id!)"
+                            >
+                              Remover
+                            </button>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PAINEL ADMINISTRATIVO -->
+        <div class="a-panel" *ngIf="section() === 'admin'">
+          <app-fornecedores
+            *ngIf="subsection() === 'fornecedores'"
+          ></app-fornecedores>
+          <app-categorias
+            *ngIf="subsection() === 'categorias'"
+          ></app-categorias>
+          <app-subcategorias
+            *ngIf="subsection() === 'subcategorias'"
+          ></app-subcategorias>
+          <app-segmentos *ngIf="subsection() === 'segmentos'"></app-segmentos>
+          <app-produtos *ngIf="subsection() === 'produtos'"></app-produtos>
+          <app-gerenciar-carrossel
+            *ngIf="subsection() === 'carrossel'"
+          ></app-gerenciar-carrossel>
+          <app-estoque *ngIf="subsection() === 'estoque'"></app-estoque>
+          <app-dashboard *ngIf="subsection() === 'dashboard'"></app-dashboard>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================================================================
+     MODAL: EDITAR DADOS DO USUÁRIO
+     ======================================================================== -->
+<div
+  class="modal fade"
+  [class.show]="showModalUsuario()"
+  [style.display]="showModalUsuario() ? 'block' : 'none'"
+  tabindex="-1"
+  role="dialog"
+>
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Editar Dados Pessoais</h5>
+        <button
+          type="button"
+          class="btn-close"
+          (click)="fecharModalUsuario()"
+          aria-label="Close"
+        ></button>
+      </div>
+      <form [formGroup]="usuarioForm" (ngSubmit)="salvarUsuario()">
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="userName" class="form-label">Nome</label>
+            <input
+              type="text"
+              class="form-control"
+              id="userName"
+              formControlName="name"
+              placeholder="Seu nome completo"
+            />
+            <div
+              *ngIf="
+                usuarioForm.get('name')?.invalid &&
+                usuarioForm.get('name')?.touched
+              "
+              class="text-danger small mt-1"
+            >
+              Nome é obrigatório (mínimo 2 caracteres)
+            </div>
+          </div>
+          <div class="mb-3">
+            <label for="userEmail" class="form-label">E-mail</label>
+            <input
+              type="email"
+              class="form-control"
+              id="userEmail"
+              formControlName="email"
+              placeholder="seu@email.com"
+            />
+            <div
+              *ngIf="
+                usuarioForm.get('email')?.invalid &&
+                usuarioForm.get('email')?.touched
+              "
+              class="text-danger small mt-1"
+            >
+              E-mail inválido
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            (click)="fecharModalUsuario()"
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            class="btn btn-primary"
+            [disabled]="!usuarioForm.valid"
+          >
+            Salvar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<div
+  *ngIf="showModalUsuario()"
+  class="modal-backdrop fade show"
+  (click)="fecharModalUsuario()"
+></div>
+
+<!-- ========================================================================
+     MODAL: ENDEREÇO (CRIAR/EDITAR)
+     ======================================================================== -->
+<div
+  class="modal fade"
+  [class.show]="showModalEndereco()"
+  [style.display]="showModalEndereco() ? 'block' : 'none'"
+  tabindex="-1"
+  role="dialog"
+>
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          {{ editEnderecoId() !== null ? "Editar" : "Novo" }} Endereço
+        </h5>
+        <button
+          type="button"
+          class="btn-close"
+          (click)="fecharModalEndereco()"
+          aria-label="Close"
+        ></button>
+      </div>
+      <form [formGroup]="enderecoForm" (ngSubmit)="salvarEndereco()">
+        <div class="modal-body">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label for="enderecoCep" class="form-label">
+                CEP
+                <span
+                  *ngIf="isLoadingCep()"
+                  class="spinner-border spinner-border-sm ms-2"
+                  role="status"
+                >
+                  <span class="visually-hidden">Buscando CEP...</span>
+                </span>
+              </label>
+              <input
+                type="text"
+                class="form-control"
+                id="enderecoCep"
+                formControlName="cep"
+                placeholder="00000-000"
+                maxlength="9"
+                (keypress)="onCepKeyPress($event)"
+              />
+              <div class="small text-muted mt-1" *ngIf="!isLoadingCep()">
+                Digite o CEP para buscar automaticamente
+              </div>
+              <div class="small text-primary mt-1" *ngIf="isLoadingCep()">
+                🔍 Buscando CEP...
+              </div>
+              <div
+                *ngIf="
+                  enderecoForm.get('cep')?.invalid &&
+                  enderecoForm.get('cep')?.touched
+                "
+                class="text-danger small mt-1"
+              >
+                CEP inválido (formato: 00000-000)
+              </div>
+            </div>
+            <div class="col-md-6">
+              <label for="enderecoTipo" class="form-label">Tipo</label>
+              <select
+                class="form-select"
+                id="enderecoTipo"
+                formControlName="tipo"
+              >
+                <option *ngFor="let tipo of tiposEndereco" [value]="tipo">
+                  {{ traduzirTipoEndereco(tipo) }}
+                </option>
+              </select>
+            </div>
+            <div class="col-md-8">
+              <label for="enderecoLogradouro" class="form-label"
+                >Logradouro</label
+              >
+              <input
+                type="text"
+                class="form-control"
+                id="enderecoLogradouro"
+                formControlName="logradouro"
+                placeholder="Rua, Avenida, etc."
+              />
+            </div>
+            <div class="col-md-4">
+              <label for="enderecoNumero" class="form-label">Número</label>
+              <input
+                type="text"
+                class="form-control"
+                id="enderecoNumero"
+                formControlName="numero"
+                placeholder="123"
+              />
+            </div>
+            <div class="col-md-12">
+              <label for="enderecoComplemento" class="form-label"
+                >Complemento</label
+              >
+              <input
+                type="text"
+                class="form-control"
+                id="enderecoComplemento"
+                formControlName="complemento"
+                placeholder="Apto, Bloco, etc. (opcional)"
+              />
+            </div>
+            <div class="col-md-4">
+              <label for="enderecoBairro" class="form-label">Bairro</label>
+              <input
+                type="text"
+                class="form-control"
+                id="enderecoBairro"
+                formControlName="bairro"
+                placeholder="Bairro"
+              />
+            </div>
+            <div class="col-md-6">
+              <label for="enderecoCidade" class="form-label">Cidade</label>
+              <input
+                type="text"
+                class="form-control"
+                id="enderecoCidade"
+                formControlName="cidade"
+                placeholder="Cidade"
+              />
+            </div>
+            <div class="col-md-2">
+              <label for="enderecoEstado" class="form-label">UF</label>
+              <input
+                type="text"
+                class="form-control"
+                id="enderecoEstado"
+                formControlName="estado"
+                placeholder="SP"
+                maxlength="2"
+                style="text-transform: uppercase"
+              />
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            (click)="fecharModalEndereco()"
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            class="btn btn-primary"
+            [disabled]="!enderecoForm.valid"
+          >
+            Salvar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<div
+  *ngIf="showModalEndereco()"
+  class="modal-backdrop fade show"
+  (click)="fecharModalEndereco()"
+></div>
+
+<!-- ========================================================================
+     MODAL: TELEFONE (CRIAR/EDITAR)
+     ======================================================================== -->
+<div
+  class="modal fade"
+  [class.show]="showModalTelefone()"
+  [style.display]="showModalTelefone() ? 'block' : 'none'"
+  tabindex="-1"
+  role="dialog"
+>
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          {{ editTelefoneId() !== null ? "Editar" : "Novo" }} Telefone
+        </h5>
+        <button
+          type="button"
+          class="btn-close"
+          (click)="fecharModalTelefone()"
+          aria-label="Close"
+        ></button>
+      </div>
+      <form [formGroup]="telefoneForm" (ngSubmit)="salvarTelefone()">
+        <div class="modal-body">
+          <div class="row g-3">
+            <div class="col-md-4">
+              <label for="telefoneDdd" class="form-label">DDD</label>
+              <input
+                type="text"
+                class="form-control"
+                id="telefoneDdd"
+                formControlName="ddd"
+                placeholder="11"
+                maxlength="2"
+              />
+              <div
+                *ngIf="
+                  telefoneForm.get('ddd')?.invalid &&
+                  telefoneForm.get('ddd')?.touched
+                "
+                class="text-danger small mt-1"
+              >
+                DDD inválido (2 dígitos)
+              </div>
+            </div>
+            <div class="col-md-8">
+              <label for="telefoneNumero" class="form-label">Número</label>
+              <input
+                type="text"
+                class="form-control"
+                id="telefoneNumero"
+                formControlName="numero"
+                placeholder="912345678"
+                maxlength="9"
+              />
+              <div
+                *ngIf="
+                  telefoneForm.get('numero')?.invalid &&
+                  telefoneForm.get('numero')?.touched
+                "
+                class="text-danger small mt-1"
+              >
+                Número inválido (8 ou 9 dígitos)
+              </div>
+            </div>
+            <div class="col-md-12">
+              <label for="telefoneTipo" class="form-label">Tipo</label>
+              <select
+                class="form-select"
+                id="telefoneTipo"
+                formControlName="tipo"
+              >
+                <option *ngFor="let tipo of tiposTelefone" [value]="tipo">
+                  {{ traduzirTipoTelefone(tipo) }}
+                </option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            (click)="fecharModalTelefone()"
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            class="btn btn-primary"
+            [disabled]="!telefoneForm.valid"
+          >
+            Salvar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<div
+  *ngIf="showModalTelefone()"
+  class="modal-backdrop fade show"
+  (click)="fecharModalTelefone()"
+></div>

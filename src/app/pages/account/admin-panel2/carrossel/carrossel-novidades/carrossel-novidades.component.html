@@ -1,0 +1,224 @@
+<div class="carrossel-novidades-component">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h6 class="m-0">Carrossel de Novidades</h6>
+    <button class="btn btn-outline-primary btn-sm" (click)="abrirModalNovo()">
+      <i class="bi bi-plus-lg"></i> Novo Item
+    </button>
+  </div>
+
+  <div *ngIf="isLoading()" class="text-center text-muted py-3">
+    <div class="spinner-border spinner-border-sm" role="status">
+      <span class="visually-hidden">Carregando...</span>
+    </div>
+    <p class="mt-2 mb-0">Carregando itens...</p>
+  </div>
+
+  <div *ngIf="!isLoading() && itens().length === 0" class="alert alert-info">
+    ℹ️ Nenhum item encontrado.
+  </div>
+
+  <div class="table-responsive" *ngIf="!isLoading() && itens().length > 0">
+    <table class="table table-striped align-middle">
+      <thead>
+        <tr>
+          <th>Ordem</th>
+          <th>Imagem</th>
+          <th>Título</th>
+          <th>Status</th>
+          <th width="180" class="text-center">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of itens()">
+          <td>{{ item.ordem }}</td>
+          <td>
+            <img
+              [src]="formatarUrlImagem(item.imageUrl)"
+              alt="Preview"
+              style="max-width: 100px; height: auto; border-radius: 4px;"
+              (error)="onImageError($event)"
+              onerror="this.src='/assets/logo/Logo-Thiers.png'"
+            />
+          </td>
+          <td>{{ item.title || "-" }}</td>
+          <td>
+            <span
+              class="badge"
+              [class.bg-success]="item.ativo"
+              [class.bg-secondary]="!item.ativo"
+            >
+              {{ item.ativo ? "Ativo" : "Inativo" }}
+            </span>
+          </td>
+          <td class="text-center">
+            <button
+              class="btn btn-sm btn-outline-primary me-1"
+              (click)="abrirModalEditar(item)"
+              title="Editar"
+            >
+              ✏️
+            </button>
+            <button
+              *ngIf="item.ativo"
+              class="btn btn-sm btn-outline-warning me-1"
+              (click)="desativar(item.id!)"
+              title="Desativar"
+            >
+              ⏸️
+            </button>
+            <button
+              *ngIf="!item.ativo"
+              class="btn btn-sm btn-outline-success me-1"
+              (click)="ativar(item.id!)"
+              title="Ativar"
+            >
+              ▶️
+            </button>
+            <button
+              class="btn btn-sm btn-outline-danger"
+              (click)="excluir(item.id!)"
+              title="Excluir"
+            >
+              🗑️
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Modal -->
+<div
+  class="modal fade"
+  [class.show]="showModal()"
+  [style.display]="showModal() ? 'block' : 'none'"
+  tabindex="-1"
+  role="dialog"
+>
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          {{ editId() !== null ? "Editar" : "Novo" }} Item do Carrossel
+        </h5>
+        <button
+          type="button"
+          class="btn-close"
+          (click)="fecharModal()"
+          aria-label="Close"
+        ></button>
+      </div>
+      <form [formGroup]="form" (ngSubmit)="salvar()">
+        <div class="modal-body">
+          <div class="row g-3">
+            <!-- Seleção de Imagem -->
+            <div class="col-12">
+              <label class="form-label">
+                Imagem *
+                <span class="text-danger" *ngIf="!editId()">(obrigatório para novo item)</span>
+              </label>
+              <input
+                type="file"
+                accept="image/*"
+                class="form-control"
+                (change)="onImagemSelecionada($event)"
+                [required]="!editId()"
+              />
+              <small class="text-muted">
+                {{ editId() ? 'Selecione uma nova imagem para substituir a atual (opcional)' : 'Selecione uma imagem para o carrossel' }}
+              </small>
+            </div>
+
+            <!-- Preview da Imagem -->
+            <div class="col-12" *ngIf="previewImagem()">
+              <label class="form-label">Preview</label>
+              <img
+                [src]="previewImagem()!"
+                alt="Preview"
+                class="img-thumbnail d-block"
+                style="max-width: 100%; height: auto; max-height: 300px;"
+                (error)="onImageError($event)"
+                onerror="this.src='/assets/logo/Logo-Thiers.png'"
+              />
+            </div>
+
+            <!-- Título -->
+            <div class="col-12">
+              <label class="form-label">Título</label>
+              <input 
+                type="text" 
+                class="form-control" 
+                formControlName="title" 
+                placeholder="Título do item (opcional)" 
+              />
+            </div>
+
+            <!-- Descrição -->
+            <div class="col-12">
+              <label class="form-label">Descrição</label>
+              <textarea
+                class="form-control"
+                formControlName="description"
+                rows="3"
+                placeholder="Descrição do item (opcional)"
+              ></textarea>
+            </div>
+
+            <!-- Ordem -->
+            <div class="col-md-6">
+              <label class="form-label">Ordem *</label>
+              <input
+                type="number"
+                class="form-control"
+                formControlName="ordem"
+                [class.is-invalid]="
+                  form.get('ordem')?.invalid && form.get('ordem')?.touched
+                "
+                min="0"
+              />
+              <div
+                class="invalid-feedback"
+                *ngIf="form.get('ordem')?.invalid && form.get('ordem')?.touched"
+              >
+                Ordem é obrigatória e deve ser maior ou igual a zero
+              </div>
+            </div>
+
+            <!-- Status -->
+            <div class="col-md-6">
+              <label class="form-label">Status</label>
+              <select class="form-select" formControlName="ativo">
+                <option [value]="true">Ativo</option>
+                <option [value]="false">Inativo</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            (click)="fecharModal()"
+            [disabled]="isUploading()"
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            class="btn btn-primary"
+            [disabled]="!form.valid || isUploading()"
+          >
+            <span *ngIf="isUploading()" class="spinner-border spinner-border-sm me-2" role="status"></span>
+            {{ isUploading() ? 'Enviando...' : 'Salvar' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<div
+  *ngIf="showModal()"
+  class="modal-backdrop fade show"
+  (click)="fecharModal()"
+></div>

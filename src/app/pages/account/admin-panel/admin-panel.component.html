@@ -1,0 +1,2785 @@
+<div class="admin-panel">
+  <h2 class="h5 mb-3" *ngIf="!activeSubsection">Painel Administrativo</h2>
+  <h2 class="h5 mb-3" *ngIf="activeSubsection">{{ getSubsectionTitle() }}</h2>
+
+  <!-- Accordion Always Open (sem data-bs-parent para permitir múltiplos abertos) -->
+  <div
+    class="accordion accordion-flush"
+    id="accAdmin"
+    *ngIf="!activeSubsection"
+  >
+    <!-- =====================================================================
+         ACCORDION: FORNECEDORES
+         ===================================================================== -->
+    <div class="accordion-item">
+      <h2 class="accordion-header" id="accFornecedoresH">
+        <button
+          class="accordion-button collapsed"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#accFornecedores"
+          aria-expanded="false"
+          aria-controls="accFornecedores"
+        >
+          🏭 Fornecedores
+        </button>
+      </h2>
+      <div
+        id="accFornecedores"
+        class="accordion-collapse collapse"
+        aria-labelledby="accFornecedoresH"
+      >
+        <div class="accordion-body">
+          <!-- Cabeçalho com título e botão novo -->
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h6 class="m-0">Gerenciar Fornecedores</h6>
+            <button
+              class="btn btn-outline-primary btn-sm"
+              (click)="abrirModalNovoFornecedor()"
+            >
+              <i class="bi bi-plus-lg"></i> Novo Fornecedor
+            </button>
+          </div>
+
+          <!-- Barra de busca e filtros -->
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <div class="input-group">
+                <input
+                  type="text"
+                  class="form-control"
+                  placeholder="Buscar por nome..."
+                  [value]="buscaFornecedor()"
+                  (input)="buscaFornecedor.set($any($event.target).value)"
+                  (keyup.enter)="onBuscarFornecedor()"
+                />
+                <button
+                  class="btn btn-outline-secondary"
+                  type="button"
+                  (click)="onBuscarFornecedor()"
+                  title="Buscar"
+                >
+                  <i class="bi bi-search"></i>
+                </button>
+                <button
+                  class="btn btn-outline-secondary"
+                  type="button"
+                  (click)="limparBuscaFornecedor()"
+                  title="Limpar busca"
+                  *ngIf="buscaFornecedor()"
+                >
+                  <i class="bi bi-x-lg"></i>
+                </button>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="btn-group" role="group">
+                <button
+                  type="button"
+                  class="btn btn-sm"
+                  [class.btn-primary]="filtroAtivos() === null"
+                  [class.btn-outline-primary]="filtroAtivos() !== null"
+                  (click)="filtrarPorStatus(null)"
+                >
+                  Todos
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-sm"
+                  [class.btn-success]="filtroAtivos() === true"
+                  [class.btn-outline-success]="filtroAtivos() !== true"
+                  (click)="filtrarPorStatus(true)"
+                >
+                  Ativos
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-sm"
+                  [class.btn-secondary]="filtroAtivos() === false"
+                  [class.btn-outline-secondary]="filtroAtivos() !== false"
+                  (click)="filtrarPorStatus(false)"
+                >
+                  Inativos
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Loading -->
+          <div
+            *ngIf="isLoadingFornecedores()"
+            class="text-center text-muted py-3"
+          >
+            <div class="spinner-border spinner-border-sm" role="status">
+              <span class="visually-hidden">Carregando...</span>
+            </div>
+            <p class="mt-2 mb-0">Carregando fornecedores...</p>
+          </div>
+
+          <!-- Lista vazia -->
+          <div
+            *ngIf="!isLoadingFornecedores() && fornecedores().length === 0"
+            class="alert alert-info"
+          >
+            ℹ️ Nenhum fornecedor encontrado.
+          </div>
+
+          <!-- Tabela de fornecedores -->
+          <div
+            class="table-responsive"
+            *ngIf="!isLoadingFornecedores() && fornecedores().length > 0"
+          >
+            <table class="table table-striped align-middle">
+              <thead>
+                <tr>
+                  <th>Nome</th>
+                  <th>CNPJ</th>
+                  <th>Telefone</th>
+                  <th>E-mail</th>
+                  <th>Status</th>
+                  <th width="180" class="text-center">Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let fornecedor of fornecedores()">
+                  <td>
+                    <div class="fw-semibold">{{ fornecedor.nome }}</div>
+                  </td>
+                  <td>{{ fornecedor.cnpj || "-" }}</td>
+                  <td>{{ fornecedor.telefone }}</td>
+                  <td>{{ fornecedor.email }}</td>
+                  <td>
+                    <span
+                      class="badge"
+                      [class.bg-success]="fornecedor.ativo"
+                      [class.bg-secondary]="!fornecedor.ativo"
+                    >
+                      {{ fornecedor.ativo ? "Ativo" : "Inativo" }}
+                    </span>
+                  </td>
+                  <td class="text-center">
+                    <button
+                      class="btn btn-sm btn-outline-primary me-1"
+                      (click)="abrirModalEditarFornecedor(fornecedor)"
+                      title="Editar fornecedor"
+                    >
+                      ✏️
+                    </button>
+                    <button
+                      class="btn btn-sm btn-outline-info me-1"
+                      (click)="visualizarFornecedor(fornecedor)"
+                      title="Visualizar fornecedor"
+                    >
+                      👁️
+                    </button>
+                    <button
+                      *ngIf="fornecedor.ativo"
+                      class="btn btn-sm btn-outline-warning me-1"
+                      (click)="desativarFornecedor(fornecedor.id!)"
+                      title="Desativar fornecedor"
+                    >
+                      ⏸️
+                    </button>
+                    <button
+                      *ngIf="!fornecedor.ativo"
+                      class="btn btn-sm btn-outline-success me-1"
+                      (click)="ativarFornecedor(fornecedor.id!)"
+                      title="Ativar fornecedor"
+                    >
+                      ▶️
+                    </button>
+                    <button
+                      class="btn btn-sm btn-outline-danger"
+                      (click)="excluirFornecedor(fornecedor.id!)"
+                      title="Excluir fornecedor"
+                    >
+                      🗑️
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Paginação -->
+          <div
+            *ngIf="
+              !isLoadingFornecedores() &&
+              fornecedoresPage() &&
+              fornecedoresPage().totalPages > 1
+            "
+            class="d-flex justify-content-between align-items-center mt-3"
+          >
+            <div class="text-muted small">
+              Mostrando
+              {{ fornecedoresPage().number * fornecedoresPage().size + 1 }} a
+              {{
+                Math.min(
+                  (fornecedoresPage().number + 1) * fornecedoresPage().size,
+                  fornecedoresPage().totalElements
+                )
+              }}
+              de {{ fornecedoresPage().totalElements }} fornecedores
+            </div>
+            <nav>
+              <ul class="pagination pagination-sm mb-0">
+                <li
+                  class="page-item"
+                  [class.disabled]="fornecedoresPage().number === 0"
+                >
+                  <a
+                    class="page-link"
+                    href="#"
+                    (click)="
+                      paginaAnteriorFornecedores(); $event.preventDefault()
+                    "
+                  >
+                    Anterior
+                  </a>
+                </li>
+                <li
+                  *ngFor="let page of getPaginasFornecedores(); let i = index"
+                  class="page-item"
+                  [class.active]="i === fornecedoresPage().number"
+                >
+                  <a
+                    class="page-link"
+                    href="#"
+                    (click)="
+                      irParaPaginaFornecedores(i); $event.preventDefault()
+                    "
+                  >
+                    {{ i + 1 }}
+                  </a>
+                </li>
+                <li
+                  class="page-item"
+                  [class.disabled]="
+                    fornecedoresPage().number ===
+                    fornecedoresPage().totalPages - 1
+                  "
+                >
+                  <a
+                    class="page-link"
+                    href="#"
+                    (click)="
+                      proximaPaginaFornecedores(); $event.preventDefault()
+                    "
+                  >
+                    Próxima
+                  </a>
+                </li>
+              </ul>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- =====================================================================
+         ACCORDION: CATEGORIAS
+         ===================================================================== -->
+    <div class="accordion-item">
+      <h2 class="accordion-header" id="accCategoriasH">
+        <button
+          class="accordion-button collapsed"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#accCategorias"
+          aria-expanded="false"
+          aria-controls="accCategorias"
+        >
+          📂 Categorias
+        </button>
+      </h2>
+      <div
+        id="accCategorias"
+        class="accordion-collapse collapse"
+        aria-labelledby="accCategoriasH"
+      >
+        <div class="accordion-body">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h6 class="m-0">Gerenciar Categorias</h6>
+            <button
+              class="btn btn-outline-primary btn-sm"
+              (click)="abrirModalNovaCategoria()"
+            >
+              <i class="bi bi-plus-lg"></i> Nova Categoria
+            </button>
+          </div>
+
+          <div
+            *ngIf="isLoadingCategorias()"
+            class="text-center text-muted py-3"
+          >
+            Carregando categorias...
+          </div>
+
+          <div
+            *ngIf="!isLoadingCategorias() && categorias().length === 0"
+            class="alert alert-info"
+          >
+            ℹ️ Nenhuma categoria cadastrada.
+          </div>
+
+          <div class="table-responsive" *ngIf="categorias().length > 0">
+            <table class="table table-striped align-middle">
+              <thead>
+                <tr>
+                  <th>Nome</th>
+                  <th>Descrição</th>
+                  <th>Status</th>
+                  <th class="text-end">Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let categoria of categorias()">
+                  <td>
+                    <div class="fw-semibold">{{ categoria.nome }}</div>
+                  </td>
+                  <td>{{ categoria.descricao || "-" }}</td>
+                  <td>
+                    <span
+                      class="badge"
+                      [class.bg-success]="categoria.ativa"
+                      [class.bg-secondary]="!categoria.ativa"
+                    >
+                      {{ categoria.ativa ? "Ativa" : "Inativa" }}
+                    </span>
+                  </td>
+                  <td class="text-end">
+                    <button
+                      class="btn btn-outline-secondary btn-sm me-2"
+                      (click)="abrirModalEditarCategoria(categoria)"
+                    >
+                      Editar
+                    </button>
+                    <button
+                      class="btn btn-outline-danger btn-sm"
+                      (click)="excluirCategoria(categoria.id!)"
+                    >
+                      Remover
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- =====================================================================
+         ACCORDION: SUBCATEGORIAS
+         ===================================================================== -->
+    <div class="accordion-item">
+      <h2 class="accordion-header" id="accSubcategoriasH">
+        <button
+          class="accordion-button collapsed"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#accSubcategorias"
+          aria-expanded="false"
+          aria-controls="accSubcategorias"
+        >
+          📑 Subcategorias
+        </button>
+      </h2>
+      <div
+        id="accSubcategorias"
+        class="accordion-collapse collapse"
+        aria-labelledby="accSubcategoriasH"
+      >
+        <div class="accordion-body">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h6 class="m-0">Gerenciar Subcategorias</h6>
+            <button
+              class="btn btn-outline-primary btn-sm"
+              (click)="abrirModalNovaSubcategoria()"
+            >
+              <i class="bi bi-plus-lg"></i> Nova Subcategoria
+            </button>
+          </div>
+
+          <div
+            *ngIf="isLoadingSubcategorias()"
+            class="text-center text-muted py-3"
+          >
+            Carregando subcategorias...
+          </div>
+
+          <div
+            *ngIf="!isLoadingSubcategorias() && subcategorias().length === 0"
+            class="alert alert-info"
+          >
+            ℹ️ Nenhuma subcategoria cadastrada.
+          </div>
+
+          <div class="table-responsive" *ngIf="subcategorias().length > 0">
+            <table class="table table-striped align-middle">
+              <thead>
+                <tr>
+                  <th>Nome</th>
+                  <th>Categoria</th>
+                  <th>Descrição</th>
+                  <th>Status</th>
+                  <th class="text-end">Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let subcategoria of subcategorias()">
+                  <td>
+                    <div class="fw-semibold">{{ subcategoria.nome }}</div>
+                  </td>
+                  <td>{{ subcategoria.categoriaNome }}</td>
+                  <td>{{ subcategoria.descricao || "-" }}</td>
+                  <td>
+                    <span
+                      class="badge"
+                      [class.bg-success]="subcategoria.ativa"
+                      [class.bg-secondary]="!subcategoria.ativa"
+                    >
+                      {{ subcategoria.ativa ? "Ativa" : "Inativa" }}
+                    </span>
+                  </td>
+                  <td class="text-end">
+                    <button
+                      class="btn btn-outline-secondary btn-sm me-2"
+                      (click)="abrirModalEditarSubcategoria(subcategoria)"
+                    >
+                      Editar
+                    </button>
+                    <button
+                      class="btn btn-outline-danger btn-sm"
+                      (click)="excluirSubcategoria(subcategoria.id!)"
+                    >
+                      Remover
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- =====================================================================
+         ACCORDION: SEGMENTOS
+         ===================================================================== -->
+    <div class="accordion-item">
+      <h2 class="accordion-header" id="accSegmentosH">
+        <button
+          class="accordion-button collapsed"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#accSegmentos"
+          aria-expanded="false"
+          aria-controls="accSegmentos"
+        >
+          🏷️ Segmentos
+        </button>
+      </h2>
+      <div
+        id="accSegmentos"
+        class="accordion-collapse collapse"
+        aria-labelledby="accSegmentosH"
+      >
+        <div class="accordion-body">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h6 class="m-0">Gerenciar Segmentos</h6>
+            <button
+              class="btn btn-outline-primary btn-sm"
+              (click)="abrirModalNovoSegmento()"
+            >
+              <i class="bi bi-plus-lg"></i> Novo Segmento
+            </button>
+          </div>
+
+          <div *ngIf="isLoadingSegmentos()" class="text-center text-muted py-3">
+            Carregando segmentos...
+          </div>
+
+          <div
+            *ngIf="!isLoadingSegmentos() && segmentos().length === 0"
+            class="alert alert-info"
+          >
+            ℹ️ Nenhum segmento cadastrado.
+          </div>
+
+          <div class="table-responsive" *ngIf="segmentos().length > 0">
+            <table class="table table-striped align-middle">
+              <thead>
+                <tr>
+                  <th>Nome</th>
+                  <th>Subcategoria</th>
+                  <th>Categoria</th>
+                  <th>Descrição</th>
+                  <th>Status</th>
+                  <th class="text-end">Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let segmento of segmentos()">
+                  <td>
+                    <div class="fw-semibold">{{ segmento.nome }}</div>
+                  </td>
+                  <td>{{ segmento.subcategoriaNome || "-" }}</td>
+                  <td>{{ segmento.categoriaNome || "-" }}</td>
+                  <td>{{ segmento.descricao || "-" }}</td>
+                  <td>
+                    <span
+                      class="badge"
+                      [class.bg-success]="segmento.ativa"
+                      [class.bg-secondary]="!segmento.ativa"
+                    >
+                      {{ segmento.ativa ? "Ativo" : "Inativo" }}
+                    </span>
+                  </td>
+                  <td class="text-end">
+                    <button
+                      class="btn btn-outline-secondary btn-sm me-2"
+                      (click)="abrirModalEditarSegmento(segmento)"
+                    >
+                      Editar
+                    </button>
+                    <button
+                      class="btn btn-outline-danger btn-sm"
+                      (click)="excluirSegmento(segmento.id!)"
+                    >
+                      Remover
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- =====================================================================
+         ACCORDION: PRODUTOS
+         ===================================================================== -->
+    <div class="accordion-item">
+      <h2 class="accordion-header" id="accProdutosH">
+        <button
+          class="accordion-button collapsed"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#accProdutos"
+          aria-expanded="false"
+          aria-controls="accProdutos"
+        >
+          🛍️ Produtos
+        </button>
+      </h2>
+      <div
+        id="accProdutos"
+        class="accordion-collapse collapse"
+        aria-labelledby="accProdutosH"
+      >
+        <div class="accordion-body">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h6 class="m-0">Gerenciar Produtos</h6>
+            <button
+              class="btn btn-outline-primary btn-sm"
+              (click)="abrirModalNovoProduto()"
+            >
+              <i class="bi bi-plus-lg"></i> Novo Produto
+            </button>
+          </div>
+
+          <div *ngIf="isLoadingProdutos()" class="text-center text-muted py-3">
+            Carregando produtos...
+          </div>
+
+          <div
+            *ngIf="!isLoadingProdutos() && erroCarregarProdutos()"
+            class="alert alert-danger"
+          >
+            <strong>❌ Erro ao carregar produtos:</strong>
+            {{ erroCarregarProdutos() }}
+            <button
+              type="button"
+              class="btn btn-sm btn-outline-danger ms-2"
+              (click)="carregarProdutos()"
+            >
+              Tentar Novamente
+            </button>
+          </div>
+
+          <div
+            *ngIf="
+              !isLoadingProdutos() &&
+              !erroCarregarProdutos() &&
+              produtos().length === 0
+            "
+            class="alert alert-info"
+          >
+            ℹ️ Nenhum produto cadastrado.
+          </div>
+
+          <div class="table-responsive" *ngIf="produtos().length > 0">
+            <table class="table table-striped align-middle">
+              <thead>
+                <tr>
+                  <th>Nome</th>
+                  <th width="80" class="text-center">Img</th>
+                  <th>Segmento</th>
+                  <th>Fornecedor</th>
+                  <th>Preço</th>
+                  <th>Estoque</th>
+                  <th>Status</th>
+                  <th class="text-end">Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let produto of produtos()">
+                  <td>
+                    <div class="fw-semibold">{{ produto.nome }}</div>
+                    <small
+                      class="text-muted"
+                      *ngIf="produto.atributos && produto.atributos.length > 0"
+                    >
+                      <span
+                        *ngFor="let attr of produto.atributos; let last = last"
+                      >
+                        {{ attr.nome }}: {{ attr.valor
+                        }}<span *ngIf="!last">, </span>
+                      </span>
+                    </small>
+                  </td>
+                  <td class="text-center">
+                    <!-- Sempre tentar exibir imagem, mesmo se o array estiver vazio -->
+                    <div
+                      style="
+                        width: 50px;
+                        height: 50px;
+                        display: inline-block;
+                        position: relative;
+                      "
+                    >
+                      <img
+                        [src]="getImagemProduto(produto)"
+                        [alt]="produto.nome"
+                        class="rounded"
+                        style="
+                          width: 100%;
+                          height: 100%;
+                          object-fit: cover;
+                          border: 1px solid #dee2e6;
+                          background-color: #f8f9fa;
+                        "
+                        (error)="onImagemError($event, produto)"
+                        (load)="onImagemLoad($event, produto)"
+                        loading="lazy"
+                      />
+                      <!-- Indicador de carregamento -->
+                      <div
+                        *ngIf="!produto.imagens || produto.imagens.length === 0"
+                        class="rounded d-flex align-items-center justify-content-center position-absolute top-0 start-0"
+                        style="
+                          width: 50px;
+                          height: 50px;
+                          background-color: #e9ecef;
+                          border: 1px solid #dee2e6;
+                          color: #6c757d;
+                          font-size: 20px;
+                          z-index: -1;
+                        "
+                        title="Sem imagem"
+                      >
+                        📦
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="fw-medium">
+                      {{ produto.segmentoNome || "-" }}
+                    </div>
+                    <small class="text-muted" *ngIf="produto.subcategoriaNome">
+                      {{ produto.subcategoriaNome }}
+                    </small>
+                  </td>
+                  <td>
+                    <span class="fw-medium">{{
+                      getPrimeiroNomeFornecedor(produto.fornecedorNome)
+                    }}</span>
+                  </td>
+                  <td>
+                    <div *ngIf="produto.precoVenda">
+                      R$ {{ produto.precoVenda | number : "1.2-2" }}
+                    </div>
+                    <small class="text-muted" *ngIf="produto.precoDe">
+                      De: R$ {{ produto.precoDe | number : "1.2-2" }}
+                    </small>
+                  </td>
+                  <td>
+                    <span
+                      class="badge"
+                      [class.bg-success]="(produto.estoqueAtual || 0) > 10"
+                      [class.bg-warning]="
+                        (produto.estoqueAtual || 0) > 0 &&
+                        (produto.estoqueAtual || 0) <= 10
+                      "
+                      [class.bg-danger]="(produto.estoqueAtual || 0) === 0"
+                    >
+                      {{ produto.estoqueAtual || 0 }}
+                    </span>
+                  </td>
+                  <td>
+                    <span
+                      class="badge"
+                      [class.bg-success]="produto.ativo"
+                      [class.bg-secondary]="!produto.ativo"
+                    >
+                      {{ produto.ativo ? "Ativo" : "Inativo" }}
+                    </span>
+                  </td>
+                  <td class="text-end">
+                    <button
+                      class="btn btn-outline-secondary btn-sm me-2"
+                      (click)="abrirModalEditarProduto(produto)"
+                    >
+                      Editar
+                    </button>
+                    <button
+                      class="btn btn-outline-danger btn-sm"
+                      (click)="excluirProduto(produto.id!)"
+                    >
+                      Remover
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- =====================================================================
+         ACCORDION: CONTROLE DE CARROSSEL
+         ===================================================================== -->
+    <div class="accordion-item">
+      <h2 class="accordion-header" id="accCarrosselH">
+        <button
+          class="accordion-button"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#accCarrossel"
+          aria-expanded="true"
+          aria-controls="accCarrossel"
+        >
+          🎠 Controle de Carrossel
+        </button>
+      </h2>
+      <div
+        id="accCarrossel"
+        class="accordion-collapse collapse show"
+        aria-labelledby="accCarrosselH"
+      >
+        <div class="accordion-body">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h6 class="m-0">Gerenciar Carrossel</h6>
+          </div>
+
+          <div class="alert alert-info mb-4">
+            <i class="bi bi-info-circle"></i> Gerencie os carrosséis exibidos na
+            página inicial.
+            <br />
+            <small
+              >Em breve você poderá adicionar, remover, habilitar ou desabilitar
+              cada seção.</small
+            >
+          </div>
+
+          <!-- Acordeons dos Carrosséis -->
+          <div class="accordion accordion-flush" id="accordionCarrossel">
+            <!-- 1. Destaques -->
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="accDestaquesH">
+                <button
+                  class="accordion-button collapsed"
+                  type="button"
+                  data-bs-toggle="collapse"
+                  data-bs-target="#accDestaques"
+                  aria-expanded="false"
+                  aria-controls="accDestaques"
+                >
+                  🎯 1. Destaques
+                </button>
+              </h2>
+              <div
+                id="accDestaques"
+                class="accordion-collapse collapse"
+                aria-labelledby="accDestaquesH"
+              >
+                <div class="accordion-body">
+                  <div
+                    class="d-flex justify-content-between align-items-center mb-3"
+                  >
+                    <h6 class="m-0">Gerenciar Carrossel de Destaques</h6>
+                    <button
+                      class="btn btn-outline-primary btn-sm"
+                      (click)="abrirModalNovoCarrosselDestaque()"
+                    >
+                      <i class="bi bi-plus-lg"></i> Novo Item
+                    </button>
+                  </div>
+
+                  <div
+                    *ngIf="isLoadingCarrosselDestaques()"
+                    class="text-center text-muted py-3"
+                  >
+                    Carregando itens do carrossel...
+                  </div>
+
+                  <div
+                    *ngIf="
+                      !isLoadingCarrosselDestaques() &&
+                      carrosselDestaques().length === 0
+                    "
+                    class="alert alert-info"
+                  >
+                    ℹ️ Nenhum item cadastrado no carrossel de destaques.
+                  </div>
+
+                  <div
+                    class="table-responsive"
+                    *ngIf="
+                      !isLoadingCarrosselDestaques() &&
+                      carrosselDestaques().length > 0
+                    "
+                  >
+                    <table class="table table-striped align-middle">
+                      <thead>
+                        <tr>
+                          <th width="100">Imagem</th>
+                          <th>Título</th>
+                          <th>Descrição</th>
+                          <th width="80" class="text-center">Ordem</th>
+                          <th width="100" class="text-center">Status</th>
+                          <th width="150" class="text-end">Ações</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr *ngFor="let item of carrosselDestaques()">
+                          <td>
+                            <img
+                              [src]="formatarUrlImagemCarrossel(item.imageUrl)"
+                              [alt]="item.title || 'Imagem do carrossel'"
+                              class="rounded"
+                              style="
+                                width: 80px;
+                                height: 60px;
+                                object-fit: cover;
+                                border: 1px solid #dee2e6;
+                                background-color: #f8f9fa;
+                              "
+                              (error)="tratarErroImagem($event)"
+                            />
+                          </td>
+                          <td>
+                            <div class="fw-semibold">
+                              {{ item.title || "-" }}
+                            </div>
+                          </td>
+                          <td>
+                            <small class="text-muted">{{
+                              item.description || "-"
+                            }}</small>
+                          </td>
+                          <td class="text-center">
+                            <span class="badge bg-secondary">{{
+                              item.ordem
+                            }}</span>
+                          </td>
+                          <td class="text-center">
+                            <span
+                              class="badge"
+                              [class.bg-success]="item.ativo"
+                              [class.bg-secondary]="!item.ativo"
+                            >
+                              {{ item.ativo ? "Ativo" : "Inativo" }}
+                            </span>
+                          </td>
+                          <td class="text-end">
+                            <button
+                              class="btn btn-sm btn-outline-secondary me-1"
+                              (click)="abrirModalEditarCarrosselDestaque(item)"
+                              title="Editar item"
+                            >
+                              ✏️
+                            </button>
+                            <button
+                              *ngIf="item.ativo"
+                              class="btn btn-sm btn-outline-warning me-1"
+                              (click)="desativarCarrosselDestaque(item.id!)"
+                              title="Desativar item"
+                            >
+                              ⚠️
+                            </button>
+                            <button
+                              *ngIf="!item.ativo"
+                              class="btn btn-sm btn-outline-success me-1"
+                              (click)="ativarCarrosselDestaque(item.id!)"
+                              title="Ativar item"
+                            >
+                              ✅
+                            </button>
+                            <button
+                              class="btn btn-sm btn-outline-danger"
+                              (click)="excluirCarrosselDestaque(item.id!)"
+                              title="Remover item"
+                            >
+                              🗑️
+                            </button>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 2. Mais Vendidos -->
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="accMaisVendidosH">
+                <button
+                  class="accordion-button collapsed"
+                  type="button"
+                  data-bs-toggle="collapse"
+                  data-bs-target="#accMaisVendidos"
+                  aria-expanded="false"
+                  aria-controls="accMaisVendidos"
+                >
+                  🔥 2. Mais Vendidos
+                </button>
+              </h2>
+              <div
+                id="accMaisVendidos"
+                class="accordion-collapse collapse"
+                aria-labelledby="accMaisVendidosH"
+              >
+                <div class="accordion-body">
+                  <p class="text-muted mb-0">
+                    Gerenciamento do carrossel de produtos Mais Vendidos.
+                  </p>
+                  <small class="text-muted"
+                    >Funcionalidade em desenvolvimento.</small
+                  >
+                </div>
+              </div>
+            </div>
+
+            <!-- 3. Moda Feminina -->
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="accModaFemininaH">
+                <button
+                  class="accordion-button collapsed"
+                  type="button"
+                  data-bs-toggle="collapse"
+                  data-bs-target="#accModaFeminina"
+                  aria-expanded="false"
+                  aria-controls="accModaFeminina"
+                >
+                  👗 3. Moda Feminina
+                </button>
+              </h2>
+              <div
+                id="accModaFeminina"
+                class="accordion-collapse collapse"
+                aria-labelledby="accModaFemininaH"
+              >
+                <div class="accordion-body">
+                  <p class="text-muted mb-0">
+                    Gerenciamento do carrossel de Moda Feminina.
+                  </p>
+                  <small class="text-muted"
+                    >Funcionalidade em desenvolvimento.</small
+                  >
+                </div>
+              </div>
+            </div>
+
+            <!-- 4. Cards Aleatório de Segmento -->
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="accCardsAleatorioSegmento1H">
+                <button
+                  class="accordion-button collapsed"
+                  type="button"
+                  data-bs-toggle="collapse"
+                  data-bs-target="#accCardsAleatorioSegmento1"
+                  aria-expanded="false"
+                  aria-controls="accCardsAleatorioSegmento1"
+                >
+                  🎲 4. Cards Aleatório de Segmento
+                </button>
+              </h2>
+              <div
+                id="accCardsAleatorioSegmento1"
+                class="accordion-collapse collapse"
+                aria-labelledby="accCardsAleatorioSegmento1H"
+              >
+                <div class="accordion-body">
+                  <p class="text-muted mb-0">
+                    Gerenciamento de cards aleatórios de segmentos (primeiro
+                    grupo).
+                  </p>
+                  <small class="text-muted"
+                    >Funcionalidade em desenvolvimento.</small
+                  >
+                </div>
+              </div>
+            </div>
+
+            <!-- 5. Moda Masculino -->
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="accModaMasculinoH">
+                <button
+                  class="accordion-button collapsed"
+                  type="button"
+                  data-bs-toggle="collapse"
+                  data-bs-target="#accModaMasculino"
+                  aria-expanded="false"
+                  aria-controls="accModaMasculino"
+                >
+                  👔 5. Moda Masculino
+                </button>
+              </h2>
+              <div
+                id="accModaMasculino"
+                class="accordion-collapse collapse"
+                aria-labelledby="accModaMasculinoH"
+              >
+                <div class="accordion-body">
+                  <p class="text-muted mb-0">
+                    Gerenciamento do carrossel de Moda Masculino.
+                  </p>
+                  <small class="text-muted"
+                    >Funcionalidade em desenvolvimento.</small
+                  >
+                </div>
+              </div>
+            </div>
+
+            <!-- 6. Cards Aleatório de Segmento (Segundo) -->
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="accCardsAleatorioSegmento2H">
+                <button
+                  class="accordion-button collapsed"
+                  type="button"
+                  data-bs-toggle="collapse"
+                  data-bs-target="#accCardsAleatorioSegmento2"
+                  aria-expanded="false"
+                  aria-controls="accCardsAleatorioSegmento2"
+                >
+                  🎲 6. Cards Aleatório de Segmento
+                </button>
+              </h2>
+              <div
+                id="accCardsAleatorioSegmento2"
+                class="accordion-collapse collapse"
+                aria-labelledby="accCardsAleatorioSegmento2H"
+              >
+                <div class="accordion-body">
+                  <p class="text-muted mb-0">
+                    Gerenciamento de cards aleatórios de segmentos (segundo
+                    grupo).
+                  </p>
+                  <small class="text-muted"
+                    >Funcionalidade em desenvolvimento.</small
+                  >
+                </div>
+              </div>
+            </div>
+
+            <!-- 7. Outlet -->
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="accOutletH">
+                <button
+                  class="accordion-button collapsed"
+                  type="button"
+                  data-bs-toggle="collapse"
+                  data-bs-target="#accOutlet"
+                  aria-expanded="false"
+                  aria-controls="accOutlet"
+                >
+                  🛍️ 7. Outlet (Carrossel de Produtos)
+                </button>
+              </h2>
+              <div
+                id="accOutlet"
+                class="accordion-collapse collapse"
+                aria-labelledby="accOutletH"
+              >
+                <div class="accordion-body">
+                  <p class="text-muted mb-0">
+                    Gerenciamento do carrossel de produtos Outlet.
+                  </p>
+                  <small class="text-muted"
+                    >Funcionalidade em desenvolvimento.</small
+                  >
+                </div>
+              </div>
+            </div>
+
+            <!-- 8. Papelaria -->
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="accPapelariaH">
+                <button
+                  class="accordion-button collapsed"
+                  type="button"
+                  data-bs-toggle="collapse"
+                  data-bs-target="#accPapelaria"
+                  aria-expanded="false"
+                  aria-controls="accPapelaria"
+                >
+                  📝 8. Papelaria (Carrossel de Produtos)
+                </button>
+              </h2>
+              <div
+                id="accPapelaria"
+                class="accordion-collapse collapse"
+                aria-labelledby="accPapelariaH"
+              >
+                <div class="accordion-body">
+                  <p class="text-muted mb-0">
+                    Gerenciamento do carrossel de produtos Papelaria.
+                  </p>
+                  <small class="text-muted"
+                    >Funcionalidade em desenvolvimento.</small
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- =========================================================================
+     MODAL: FORNECEDOR (CRIAR/EDITAR)
+     ========================================================================= -->
+<div
+  class="modal fade"
+  [class.show]="showModalFornecedor()"
+  [style.display]="showModalFornecedor() ? 'block' : 'none'"
+  tabindex="-1"
+  role="dialog"
+>
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          {{ editFornecedorId() !== null ? "Editar" : "Novo" }} Fornecedor
+        </h5>
+        <button
+          type="button"
+          class="btn-close"
+          (click)="fecharModalFornecedor()"
+          aria-label="Close"
+        ></button>
+      </div>
+      <form [formGroup]="fornecedorForm" (ngSubmit)="salvarFornecedor()">
+        <div class="modal-body">
+          <div class="row g-3">
+            <div class="col-12">
+              <label class="form-label">Nome *</label>
+              <input
+                type="text"
+                class="form-control"
+                formControlName="nome"
+                placeholder="Ex: Distribuidora ABC Ltda"
+              />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">CNPJ *</label>
+              <input
+                type="text"
+                class="form-control"
+                formControlName="cnpj"
+                placeholder="00.000.000/0000-00"
+              />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Telefone *</label>
+              <input
+                type="text"
+                class="form-control"
+                formControlName="telefone"
+                placeholder="(00) 00000-0000"
+              />
+            </div>
+            <div class="col-12">
+              <label class="form-label">E-mail *</label>
+              <input
+                type="email"
+                class="form-control"
+                formControlName="email"
+                placeholder="contato@fornecedor.com.br"
+              />
+            </div>
+            <div class="col-12">
+              <label class="form-label">Observações</label>
+              <textarea
+                class="form-control"
+                formControlName="observacoes"
+                rows="2"
+                placeholder="Informações adicionais (opcional)"
+              ></textarea>
+            </div>
+
+            <div class="col-12">
+              <hr />
+              <h6>Endereço</h6>
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label">
+                CEP *
+                <span *ngIf="isLoadingCep()" class="ms-2 text-muted small">
+                  🔍 Buscando...
+                </span>
+              </label>
+              <input
+                type="text"
+                class="form-control"
+                formControlName="cep"
+                placeholder="00000-000"
+                maxlength="9"
+              />
+            </div>
+            <div class="col-md-8">
+              <label class="form-label">Logradouro *</label>
+              <input
+                type="text"
+                class="form-control"
+                formControlName="logradouro"
+                placeholder="Rua, Avenida..."
+              />
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Número *</label>
+              <input
+                type="text"
+                class="form-control"
+                formControlName="numero"
+                placeholder="123"
+              />
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Complemento</label>
+              <input
+                type="text"
+                class="form-control"
+                formControlName="complemento"
+                placeholder="Sala, Bloco..."
+              />
+            </div>
+            <div class="col-md-5">
+              <label class="form-label">Bairro *</label>
+              <input
+                type="text"
+                class="form-control"
+                formControlName="bairro"
+                placeholder="Centro"
+              />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Cidade *</label>
+              <input
+                type="text"
+                class="form-control"
+                formControlName="cidade"
+                placeholder="São Paulo"
+              />
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Estado *</label>
+              <input
+                type="text"
+                class="form-control"
+                formControlName="estado"
+                placeholder="SP"
+                maxlength="2"
+                style="text-transform: uppercase"
+              />
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Tipo *</label>
+              <select class="form-select" formControlName="tipoEndereco">
+                <option value="MATRIZ">Matriz</option>
+                <option value="FILIAL">Filial</option>
+                <option value="DEPOSITO">Depósito</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer d-flex justify-content-between">
+          <div>
+            <!-- Botões de Ativar/Desativar (somente em modo edição) -->
+            <button
+              *ngIf="editFornecedorId() !== null"
+              type="button"
+              class="btn btn-success btn-sm me-2"
+              (click)="ativarFornecedor(editFornecedorId()!)"
+              title="Ativar fornecedor"
+            >
+              ✅ Ativar
+            </button>
+            <button
+              *ngIf="editFornecedorId() !== null"
+              type="button"
+              class="btn btn-warning btn-sm"
+              (click)="desativarFornecedor(editFornecedorId()!)"
+              title="Desativar fornecedor"
+            >
+              ⚠️ Desativar
+            </button>
+          </div>
+          <div>
+            <button
+              type="button"
+              class="btn btn-secondary"
+              (click)="fecharModalFornecedor()"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              class="btn btn-primary ms-2"
+              [disabled]="!fornecedorForm.valid"
+            >
+              Salvar
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<div
+  *ngIf="showModalFornecedor()"
+  class="modal-backdrop fade show"
+  (click)="fecharModalFornecedor()"
+></div>
+
+<!-- =========================================================================
+     MODAL: CATEGORIA (CRIAR/EDITAR)
+     ========================================================================= -->
+<div
+  class="modal fade"
+  [class.show]="showModalCategoria()"
+  [style.display]="showModalCategoria() ? 'block' : 'none'"
+  tabindex="-1"
+  role="dialog"
+>
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          {{ editCategoriaId() !== null ? "Editar" : "Nova" }} Categoria
+        </h5>
+        <button
+          type="button"
+          class="btn-close"
+          (click)="fecharModalCategoria()"
+          aria-label="Close"
+        ></button>
+      </div>
+      <form [formGroup]="categoriaForm" (ngSubmit)="salvarCategoria()">
+        <div class="modal-body">
+          <div class="row g-3">
+            <div class="col-12">
+              <label class="form-label">Nome *</label>
+              <input
+                type="text"
+                class="form-control"
+                formControlName="nome"
+                placeholder="Ex: Roupas"
+              />
+            </div>
+            <div class="col-12">
+              <label class="form-label">Descrição</label>
+              <textarea
+                class="form-control"
+                formControlName="descricao"
+                rows="2"
+                placeholder="Descrição da categoria (opcional)"
+              ></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            (click)="fecharModalCategoria()"
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            class="btn btn-primary"
+            [disabled]="!categoriaForm.valid"
+          >
+            Salvar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<div
+  *ngIf="showModalCategoria()"
+  class="modal-backdrop fade show"
+  (click)="fecharModalCategoria()"
+></div>
+
+<!-- =========================================================================
+     MODAL: SUBCATEGORIA (CRIAR/EDITAR)
+     ========================================================================= -->
+<div
+  class="modal fade"
+  [class.show]="showModalSubcategoria()"
+  [style.display]="showModalSubcategoria() ? 'block' : 'none'"
+  tabindex="-1"
+  role="dialog"
+>
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          {{ editSubcategoriaId() !== null ? "Editar" : "Nova" }} Subcategoria
+        </h5>
+        <button
+          type="button"
+          class="btn-close"
+          (click)="fecharModalSubcategoria()"
+          aria-label="Close"
+        ></button>
+      </div>
+      <form [formGroup]="subcategoriaForm" (ngSubmit)="salvarSubcategoria()">
+        <div class="modal-body">
+          <div class="row g-3">
+            <div class="col-12">
+              <label class="form-label">Categoria *</label>
+              <select class="form-select" formControlName="categoriaId">
+                <option value="">Selecione...</option>
+                <option
+                  *ngFor="let categoria of categorias()"
+                  [value]="categoria.id"
+                >
+                  {{ categoria.nome }}
+                </option>
+              </select>
+            </div>
+            <div class="col-12">
+              <label class="form-label">Nome *</label>
+              <input
+                type="text"
+                class="form-control"
+                formControlName="nome"
+                placeholder="Ex: Camisetas"
+              />
+            </div>
+            <div class="col-12">
+              <label class="form-label">Descrição</label>
+              <textarea
+                class="form-control"
+                formControlName="descricao"
+                rows="2"
+                placeholder="Descrição da subcategoria (opcional)"
+              ></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            (click)="fecharModalSubcategoria()"
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            class="btn btn-primary"
+            [disabled]="!subcategoriaForm.valid"
+          >
+            Salvar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<div
+  *ngIf="showModalSubcategoria()"
+  class="modal-backdrop fade show"
+  (click)="fecharModalSubcategoria()"
+></div>
+
+<!-- =========================================================================
+     MODAL: SEGMENTO (CRIAR/EDITAR)
+     ========================================================================= -->
+<div
+  class="modal fade"
+  [class.show]="showModalSegmento()"
+  [style.display]="showModalSegmento() ? 'block' : 'none'"
+  tabindex="-1"
+  role="dialog"
+>
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          {{ editSegmentoId() !== null ? "Editar" : "Novo" }} Segmento
+        </h5>
+        <button
+          type="button"
+          class="btn-close"
+          (click)="fecharModalSegmento()"
+          aria-label="Close"
+        ></button>
+      </div>
+      <form [formGroup]="segmentoForm" (ngSubmit)="salvarSegmento()">
+        <div class="modal-body">
+          <div class="row g-3">
+            <div class="col-12">
+              <label class="form-label">Subcategoria *</label>
+              <select class="form-select" formControlName="subcategoriaId">
+                <option value="">Selecione...</option>
+                <option
+                  *ngFor="let subcategoria of subcategorias()"
+                  [value]="subcategoria.id"
+                >
+                  {{ subcategoria.categoriaNome }} - {{ subcategoria.nome }}
+                </option>
+              </select>
+            </div>
+            <div class="col-12">
+              <label class="form-label">Nome *</label>
+              <input
+                type="text"
+                class="form-control"
+                formControlName="nome"
+                placeholder="Ex: Manga Curta"
+              />
+            </div>
+            <div class="col-12">
+              <label class="form-label">Descrição</label>
+              <textarea
+                class="form-control"
+                formControlName="descricao"
+                rows="2"
+                placeholder="Descrição do segmento (opcional)"
+              ></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            (click)="fecharModalSegmento()"
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            class="btn btn-primary"
+            [disabled]="!segmentoForm.valid"
+          >
+            Salvar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<div
+  *ngIf="showModalSegmento()"
+  class="modal-backdrop fade show"
+  (click)="fecharModalSegmento()"
+></div>
+
+<!-- =========================================================================
+     MODAL: PRODUTO (CRIAR/EDITAR)
+     ========================================================================= -->
+<div
+  class="modal fade"
+  [class.show]="showModalProduto()"
+  [style.display]="showModalProduto() ? 'block' : 'none'"
+  tabindex="-1"
+  role="dialog"
+>
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          {{ editProdutoId() !== null ? "Editar" : "Novo" }} Produto
+        </h5>
+        <button
+          type="button"
+          class="btn-close"
+          (click)="fecharModalProduto()"
+          aria-label="Close"
+        ></button>
+      </div>
+      <form
+        [formGroup]="produtoForm"
+        (ngSubmit)="salvarProduto($event); $event.preventDefault()"
+      >
+        <div class="modal-body">
+          <div class="row g-3">
+            <div class="col-12">
+              <label class="form-label">Nome *</label>
+              <input
+                type="text"
+                class="form-control"
+                [class.is-invalid]="
+                  produtoForm.get('nome')?.invalid &&
+                  produtoForm.get('nome')?.touched
+                "
+                formControlName="nome"
+                placeholder="Ex: Camiseta Básica Branca"
+              />
+              <div
+                *ngIf="
+                  produtoForm.get('nome')?.invalid &&
+                  produtoForm.get('nome')?.touched
+                "
+                class="invalid-feedback"
+              >
+                Nome é obrigatório (mínimo 2 caracteres)
+              </div>
+            </div>
+
+            <div class="col-12">
+              <label class="form-label">Descrição</label>
+              <textarea
+                class="form-control"
+                formControlName="descricao"
+                rows="2"
+                placeholder="Descrição do produto (opcional)"
+              ></textarea>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Segmento *</label>
+              <select
+                class="form-select"
+                [class.is-invalid]="
+                  produtoForm.get('segmentoId')?.invalid &&
+                  produtoForm.get('segmentoId')?.touched
+                "
+                formControlName="segmentoId"
+              >
+                <option value="">Selecione...</option>
+                <option
+                  *ngFor="let segmento of segmentos()"
+                  [value]="segmento.id"
+                >
+                  {{ segmento.categoriaNome }} >
+                  {{ segmento.subcategoriaNome }} > {{ segmento.nome }}
+                </option>
+              </select>
+              <div
+                *ngIf="
+                  produtoForm.get('segmentoId')?.invalid &&
+                  produtoForm.get('segmentoId')?.touched
+                "
+                class="invalid-feedback"
+              >
+                Segmento é obrigatório
+              </div>
+              <small class="text-muted"
+                >Hierarquia: Categoria > Subcategoria > Segmento</small
+              >
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Fornecedor *</label>
+              <select
+                class="form-select"
+                [class.is-invalid]="
+                  produtoForm.get('fornecedorId')?.invalid &&
+                  produtoForm.get('fornecedorId')?.touched
+                "
+                formControlName="fornecedorId"
+              >
+                <option value="">Selecione...</option>
+                <option
+                  *ngFor="let fornecedor of fornecedores()"
+                  [value]="fornecedor.id"
+                >
+                  {{ fornecedor.nome }}
+                </option>
+              </select>
+              <div
+                *ngIf="
+                  produtoForm.get('fornecedorId')?.invalid &&
+                  produtoForm.get('fornecedorId')?.touched
+                "
+                class="invalid-feedback"
+              >
+                Fornecedor é obrigatório
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Unidade de Medida *</label>
+              <select class="form-select" formControlName="unidadeMedida">
+                <option value="UNIDADE">Unidade</option>
+                <option value="PACOTE">Pacote</option>
+                <option value="CAIXA">Caixa</option>
+                <option value="METRO">Metro</option>
+                <option value="KILO">Quilo</option>
+              </select>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Estoque Inicial *</label>
+              <input
+                type="number"
+                class="form-control"
+                formControlName="estoqueInicial"
+                placeholder="0"
+                step="1"
+                min="0"
+              />
+              <small class="text-muted">Quantidade inicial em estoque</small>
+            </div>
+
+            <div class="col-12">
+              <hr />
+              <h6>💰 Precificação</h6>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Custo Unitário *</label>
+              <input
+                type="number"
+                class="form-control"
+                [class.is-invalid]="
+                  produtoForm.get('custoUnitario')?.invalid &&
+                  produtoForm.get('custoUnitario')?.touched
+                "
+                formControlName="custoUnitario"
+                placeholder="Custo Produto R$"
+                step="0.01"
+                min="0.01"
+              />
+              <div
+                *ngIf="
+                  produtoForm.get('custoUnitario')?.invalid &&
+                  produtoForm.get('custoUnitario')?.touched
+                "
+                class="invalid-feedback"
+              >
+                Custo Unitário é obrigatório (mínimo 0.01)
+              </div>
+              <small class="text-muted">Valor de custo do produto</small>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Margem de Lucro (%) *</label>
+              <input
+                type="number"
+                class="form-control"
+                [class.is-invalid]="
+                  produtoForm.get('margemLucro')?.invalid &&
+                  produtoForm.get('margemLucro')?.touched
+                "
+                formControlName="margemLucro"
+                placeholder="Calcule %"
+                step="0.01"
+                min="0"
+              />
+              <div
+                *ngIf="
+                  produtoForm.get('margemLucro')?.invalid &&
+                  produtoForm.get('margemLucro')?.touched
+                "
+                class="invalid-feedback"
+              >
+                Margem de Lucro é obrigatória (mínimo 0)
+              </div>
+              <small class="text-muted">Percentual de lucro desejado</small>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Preço de Venda *</label>
+              <input
+                type="number"
+                class="form-control"
+                [class.is-invalid]="
+                  produtoForm.get('precoVenda')?.invalid &&
+                  produtoForm.get('precoVenda')?.touched
+                "
+                formControlName="precoVenda"
+                placeholder="0.00"
+                step="0.01"
+                min="0.01"
+              />
+              <div
+                *ngIf="
+                  produtoForm.get('precoVenda')?.invalid &&
+                  produtoForm.get('precoVenda')?.touched
+                "
+                class="invalid-feedback"
+              >
+                Preço de Venda é obrigatório (mínimo 0.01)
+              </div>
+              <small class="text-muted"
+                >📊 Calculado automaticamente (editável)</small
+              >
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Preço De</label>
+              <input
+                type="number"
+                class="form-control"
+                formControlName="precoDe"
+                placeholder="0.00"
+                step="0.01"
+                min="0"
+              />
+              <small class="text-muted"
+                >💰 Preço sugerido (Margem + 20%) - editável</small
+              >
+            </div>
+
+            <div class="col-12">
+              <hr />
+              <h6>Opções</h6>
+            </div>
+
+            <div class="col-md-6">
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  formControlName="destaque"
+                  id="checkDestaque"
+                />
+                <label class="form-check-label" for="checkDestaque">
+                  ⭐ Produto em Destaque
+                </label>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  formControlName="maisVendido"
+                  id="checkMaisVendido"
+                />
+                <label class="form-check-label" for="checkMaisVendido">
+                  🔥 Produto Mais Vendido
+                </label>
+              </div>
+            </div>
+
+            <div class="col-12">
+              <hr />
+              <h6>🏷️ Atributos Dinâmicos</h6>
+              <p class="text-muted small mb-3">
+                Adicione atributos personalizados para o produto (ex: Tamanho,
+                Cor, Material, etc.)
+              </p>
+
+              <!-- Lista de Atributos -->
+              <div formArrayName="atributos" class="mb-3">
+                <div
+                  *ngFor="
+                    let atributo of atributosFormArray.controls;
+                    let i = index
+                  "
+                  [formGroupName]="i"
+                  class="card mb-2"
+                >
+                  <div class="card-body">
+                    <div class="row g-2">
+                      <div class="col-md-5">
+                        <input
+                          type="text"
+                          class="form-control form-control-sm"
+                          formControlName="nome"
+                          placeholder="Nome do atributo (ex: Tamanho)"
+                        />
+                      </div>
+                      <div class="col-md-5">
+                        <input
+                          type="text"
+                          class="form-control form-control-sm"
+                          formControlName="valor"
+                          placeholder="Valor (ex: G)"
+                        />
+                      </div>
+                      <div class="col-md-2">
+                        <button
+                          type="button"
+                          class="btn btn-danger btn-sm w-100 d-flex align-items-center justify-content-center gap-1"
+                          (click)="removerAtributo(i)"
+                          style="
+                            border-radius: 6px;
+                            transition: all 0.2s ease;
+                            min-height: 38px;
+                            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+                          "
+                          onmouseover="this.style.backgroundColor='#c82333'; this.style.borderColor='#bd2130'; this.style.boxShadow='0 2px 4px rgba(0, 0, 0, 0.15)';"
+                          onmouseout="this.style.backgroundColor='#dc3545'; this.style.borderColor='#dc3545'; this.style.boxShadow='0 1px 3px rgba(0, 0, 0, 0.1)';"
+                          title="Remover atributo"
+                        >
+                          <i class="bi bi-trash"></i>
+                          <span class="d-none d-sm-inline">Excluir</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Botão para adicionar atributo -->
+              <button
+                type="button"
+                class="btn btn-outline-primary btn-sm"
+                (click)="adicionarAtributo()"
+              >
+                <i class="bi bi-plus-lg"></i> Adicionar Atributo
+              </button>
+            </div>
+
+            <div class="col-12" *ngIf="editProdutoId() === null">
+              <hr />
+              <h6>📸 Imagens do Produto</h6>
+              <p class="text-muted small mb-3">
+                Adicione até 3 imagens do produto (JPEG, PNG, GIF)
+              </p>
+            </div>
+
+            <!-- Upload de Imagens (apenas na criação) -->
+            <div class="col-12" *ngIf="editProdutoId() === null">
+              <div class="mb-3">
+                <label class="btn btn-outline-primary btn-sm">
+                  <i class="bi bi-upload"></i> Selecionar Imagens
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    (change)="onImagemSelecionada($event)"
+                    style="display: none"
+                    [disabled]="imagensSelecionadas().length >= 3"
+                  />
+                </label>
+                <span class="ms-2 text-muted small">
+                  {{ imagensSelecionadas().length }}/3 imagens
+                </span>
+              </div>
+
+              <!-- Preview das Imagens -->
+              <div class="row g-2" *ngIf="previewImagens().length > 0">
+                <div
+                  class="col-md-4"
+                  *ngFor="let preview of previewImagens(); let i = index"
+                >
+                  <div class="card">
+                    <img
+                      [src]="preview"
+                      class="card-img-top"
+                      alt="Preview"
+                      style="height: 150px; object-fit: cover"
+                    />
+                    <div class="card-body p-2 text-center">
+                      <button
+                        type="button"
+                        class="btn btn-sm btn-outline-danger"
+                        (click)="removerImagem(i)"
+                      >
+                        <i class="bi bi-trash"></i> Remover
+                      </button>
+                      <div class="small text-muted mt-1">
+                        Imagem {{ i + 1 }}
+                        <span *ngIf="i === 0" class="badge bg-primary ms-1"
+                          >Principal</span
+                        >
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div
+                class="alert alert-info mt-3"
+                *ngIf="imagensSelecionadas().length === 0"
+              >
+                <i class="bi bi-info-circle"></i> Você pode adicionar imagens
+                agora ou cadastrar o produto sem imagens e adicionar depois.
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer d-flex justify-content-between">
+          <div>
+            <!-- Botões de Ativar/Desativar (somente em modo edição) -->
+            <button
+              *ngIf="editProdutoId() !== null"
+              type="button"
+              class="btn btn-success btn-sm me-2"
+              (click)="ativarProduto()"
+              title="Ativar produto"
+            >
+              ✅ Ativar
+            </button>
+            <button
+              *ngIf="editProdutoId() !== null"
+              type="button"
+              class="btn btn-warning btn-sm"
+              (click)="desativarProduto()"
+              title="Desativar produto"
+            >
+              ⚠️ Desativar
+            </button>
+          </div>
+          <div>
+            <button
+              type="button"
+              class="btn btn-secondary"
+              (click)="fecharModalProduto()"
+            >
+              Cancelar
+            </button>
+            <button
+              type="button"
+              class="btn btn-primary ms-2"
+              [disabled]="!produtoForm.valid"
+              (click)="salvarProduto()"
+            >
+              Salvar
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<div
+  *ngIf="showModalProduto()"
+  class="modal-backdrop fade show"
+  (click)="fecharModalProduto()"
+></div>
+
+<!-- =========================================================================
+     MODAL: CARROSSEL DE DESTAQUES (CRIAR/EDITAR)
+     ========================================================================= -->
+<div
+  class="modal fade"
+  [class.show]="showModalCarrosselDestaque()"
+  [style.display]="showModalCarrosselDestaque() ? 'block' : 'none'"
+  tabindex="-1"
+  role="dialog"
+>
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          {{ editCarrosselDestaqueId() !== null ? "Editar" : "Novo" }} Item do
+          Carrossel
+        </h5>
+        <button
+          type="button"
+          class="btn-close"
+          (click)="fecharModalCarrosselDestaque()"
+          aria-label="Close"
+        ></button>
+      </div>
+      <form
+        [formGroup]="carrosselDestaqueForm"
+        (ngSubmit)="salvarCarrosselDestaque()"
+      >
+        <div class="modal-body">
+          <div class="row g-3">
+            <!-- Upload de Imagem -->
+            <div class="col-12">
+              <label class="form-label">Imagem *</label>
+              <div class="alert alert-info mb-2 py-2">
+                <i class="bi bi-info-circle"></i>
+                <small>
+                  <strong>Recomendação:</strong> Para melhor qualidade de
+                  apresentação, utilize imagens com dimensões de
+                  <strong>1920x550 pixels</strong> (proporção 3.49:1).
+                </small>
+              </div>
+              <div class="mb-3">
+                <label class="btn btn-outline-primary btn-sm">
+                  <i class="bi bi-upload"></i> Selecionar Imagem
+                  <input
+                    type="file"
+                    accept="image/*"
+                    (change)="onImagemCarrosselSelecionada($event)"
+                    style="display: none"
+                  />
+                </label>
+                <span class="ms-2 text-muted small">
+                  {{
+                    imagemCarrosselSelecionada()
+                      ? "Imagem selecionada"
+                      : "Nenhuma imagem selecionada"
+                  }}
+                </span>
+              </div>
+
+              <!-- Preview da Imagem -->
+              <div *ngIf="previewImagemCarrossel()" class="mt-2">
+                <img
+                  [src]="previewImagemCarrossel()"
+                  alt="Preview"
+                  class="img-thumbnail"
+                  style="
+                    max-width: 100%;
+                    max-height: 300px;
+                    object-fit: contain;
+                  "
+                />
+              </div>
+
+              <!-- URL da Imagem (para edição ou URL externa) -->
+              <div class="mt-2">
+                <label class="form-label small text-muted"
+                  >Ou informe a URL da imagem:</label
+                >
+                <input
+                  type="text"
+                  class="form-control form-control-sm"
+                  formControlName="imageUrl"
+                  placeholder="http://exemplo.com/imagem.jpg ou /uploads/imagem.jpg"
+                />
+                <small class="text-muted d-block mt-1"
+                  >Selecione uma imagem acima ou informe a URL
+                  diretamente</small
+                >
+              </div>
+            </div>
+
+            <!-- Título -->
+            <div class="col-12">
+              <label class="form-label">Título</label>
+              <input
+                type="text"
+                class="form-control"
+                formControlName="title"
+                placeholder="Ex: Coleção de Inverno"
+                maxlength="200"
+              />
+              <small class="text-muted"
+                >Título exibido na imagem (opcional)</small
+              >
+            </div>
+
+            <!-- Descrição -->
+            <div class="col-12">
+              <label class="form-label">Descrição</label>
+              <textarea
+                class="form-control"
+                formControlName="description"
+                rows="2"
+                placeholder="Ex: Novidades quentinhas para você"
+                maxlength="500"
+              ></textarea>
+              <small class="text-muted"
+                >Descrição exibida na imagem (opcional)</small
+              >
+            </div>
+
+            <!-- Ordem -->
+            <div class="col-md-6">
+              <label class="form-label">Ordem *</label>
+              <input
+                type="number"
+                class="form-control"
+                formControlName="ordem"
+                placeholder="0"
+                min="0"
+              />
+              <small class="text-muted"
+                >Ordem de exibição no carrossel (menor número aparece
+                primeiro)</small
+              >
+            </div>
+
+            <!-- Status Ativo -->
+            <div class="col-md-6">
+              <label class="form-label">Status *</label>
+              <select class="form-select" formControlName="ativo">
+                <option [value]="true">Ativo</option>
+                <option [value]="false">Inativo</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            (click)="fecharModalCarrosselDestaque()"
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            class="btn btn-primary"
+            [disabled]="!carrosselDestaqueForm.valid"
+          >
+            Salvar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Conteúdo específico quando uma subseção está selecionada -->
+  <div *ngIf="activeSubsection">
+    <!-- Fornecedores -->
+    <div *ngIf="activeSubsection.startsWith('fornecedores')">
+      <!-- Cabeçalho com título e botão novo -->
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h6 class="m-0">Gerenciar Fornecedores</h6>
+        <button
+          class="btn btn-outline-primary btn-sm"
+          (click)="abrirModalNovoFornecedor()"
+          *ngIf="activeSubsection === 'fornecedores-listar'"
+        >
+          <i class="bi bi-plus-lg"></i> Novo Fornecedor
+        </button>
+      </div>
+
+      <!-- Barra de busca e filtros -->
+      <div class="row mb-3" *ngIf="activeSubsection === 'fornecedores-listar'">
+        <div class="col-md-6">
+          <div class="input-group">
+            <input
+              type="text"
+              class="form-control"
+              placeholder="Buscar por nome..."
+              [value]="buscaFornecedor()"
+              (input)="buscaFornecedor.set($any($event.target).value)"
+              (keyup.enter)="onBuscarFornecedor()"
+            />
+            <button
+              class="btn btn-outline-secondary"
+              type="button"
+              (click)="onBuscarFornecedor()"
+              title="Buscar"
+            >
+              <i class="bi bi-search"></i>
+            </button>
+            <button
+              class="btn btn-outline-secondary"
+              type="button"
+              (click)="limparBuscaFornecedor()"
+              title="Limpar busca"
+              *ngIf="buscaFornecedor()"
+            >
+              <i class="bi bi-x-lg"></i>
+            </button>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="btn-group" role="group">
+            <button
+              type="button"
+              class="btn btn-sm"
+              [class.btn-primary]="filtroAtivos() === null"
+              [class.btn-outline-primary]="filtroAtivos() !== null"
+              (click)="filtrarPorStatus(null)"
+            >
+              Todos
+            </button>
+            <button
+              type="button"
+              class="btn btn-sm"
+              [class.btn-success]="filtroAtivos() === true"
+              [class.btn-outline-success]="filtroAtivos() !== true"
+              (click)="filtrarPorStatus(true)"
+            >
+              Ativos
+            </button>
+            <button
+              type="button"
+              class="btn btn-sm"
+              [class.btn-secondary]="filtroAtivos() === false"
+              [class.btn-outline-secondary]="filtroAtivos() !== false"
+              (click)="filtrarPorStatus(false)"
+            >
+              Inativos
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Loading -->
+      <div *ngIf="isLoadingFornecedores()" class="text-center text-muted py-3">
+        <div class="spinner-border spinner-border-sm" role="status">
+          <span class="visually-hidden">Carregando...</span>
+        </div>
+        <p class="mt-2 mb-0">Carregando fornecedores...</p>
+      </div>
+
+      <!-- Lista vazia -->
+      <div
+        *ngIf="!isLoadingFornecedores() && fornecedores().length === 0"
+        class="alert alert-info"
+      >
+        ℹ️ Nenhum fornecedor encontrado.
+      </div>
+
+      <!-- Tabela de fornecedores -->
+      <div
+        class="table-responsive"
+        *ngIf="!isLoadingFornecedores() && fornecedores().length > 0"
+      >
+        <table class="table table-striped align-middle">
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>CNPJ</th>
+              <th>Telefone</th>
+              <th>E-mail</th>
+              <th>Status</th>
+              <th width="180" class="text-center">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let fornecedor of fornecedores()">
+              <td>
+                <div class="fw-semibold">{{ fornecedor.nome }}</div>
+              </td>
+              <td>{{ fornecedor.cnpj || "-" }}</td>
+              <td>{{ fornecedor.telefone }}</td>
+              <td>{{ fornecedor.email }}</td>
+              <td>
+                <span
+                  class="badge"
+                  [class.bg-success]="fornecedor.ativo"
+                  [class.bg-secondary]="!fornecedor.ativo"
+                >
+                  {{ fornecedor.ativo ? "Ativo" : "Inativo" }}
+                </span>
+              </td>
+              <td class="text-center">
+                <button
+                  class="btn btn-sm btn-outline-primary me-1"
+                  (click)="abrirModalEditarFornecedor(fornecedor)"
+                  title="Editar fornecedor"
+                >
+                  ✏️
+                </button>
+                <button
+                  class="btn btn-sm btn-outline-info me-1"
+                  (click)="visualizarFornecedor(fornecedor)"
+                  title="Visualizar fornecedor"
+                >
+                  👁️
+                </button>
+                <button
+                  *ngIf="fornecedor.ativo"
+                  class="btn btn-sm btn-outline-warning me-1"
+                  (click)="desativarFornecedor(fornecedor.id!)"
+                  title="Desativar fornecedor"
+                >
+                  ⏸️
+                </button>
+                <button
+                  *ngIf="!fornecedor.ativo"
+                  class="btn btn-sm btn-outline-success me-1"
+                  (click)="ativarFornecedor(fornecedor.id!)"
+                  title="Ativar fornecedor"
+                >
+                  ▶️
+                </button>
+                <button
+                  class="btn btn-sm btn-outline-danger"
+                  (click)="excluirFornecedor(fornecedor.id!)"
+                  title="Excluir fornecedor"
+                >
+                  🗑️
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Paginação -->
+      <div
+        *ngIf="
+          !isLoadingFornecedores() &&
+          fornecedoresPage() &&
+          fornecedoresPage().totalPages > 1 &&
+          activeSubsection === 'fornecedores-listar'
+        "
+        class="d-flex justify-content-between align-items-center mt-3"
+      >
+        <div class="text-muted small">
+          Mostrando
+          {{ fornecedoresPage().number * fornecedoresPage().size + 1 }} a
+          {{
+            Math.min(
+              (fornecedoresPage().number + 1) * fornecedoresPage().size,
+              fornecedoresPage().totalElements
+            )
+          }}
+          de {{ fornecedoresPage().totalElements }} fornecedores
+        </div>
+        <nav>
+          <ul class="pagination pagination-sm mb-0">
+            <li
+              class="page-item"
+              [class.disabled]="fornecedoresPage().number === 0"
+            >
+              <a
+                class="page-link"
+                href="#"
+                (click)="paginaAnteriorFornecedores(); $event.preventDefault()"
+              >
+                Anterior
+              </a>
+            </li>
+            <li
+              *ngFor="let page of getPaginasFornecedores(); let i = index"
+              class="page-item"
+              [class.active]="i === fornecedoresPage().number"
+            >
+              <a
+                class="page-link"
+                href="#"
+                (click)="irParaPaginaFornecedores(i); $event.preventDefault()"
+              >
+                {{ i + 1 }}
+              </a>
+            </li>
+            <li
+              class="page-item"
+              [class.disabled]="
+                fornecedoresPage().number === fornecedoresPage().totalPages - 1
+              "
+            >
+              <a
+                class="page-link"
+                href="#"
+                (click)="proximaPaginaFornecedores(); $event.preventDefault()"
+              >
+                Próxima
+              </a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+
+    <!-- Categorias -->
+    <div *ngIf="activeSubsection.startsWith('categorias')">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h6 class="m-0">Gerenciar Categorias</h6>
+        <button
+          class="btn btn-outline-primary btn-sm"
+          (click)="abrirModalNovaCategoria()"
+          *ngIf="activeSubsection === 'categorias-listar'"
+        >
+          <i class="bi bi-plus-lg"></i> Nova Categoria
+        </button>
+      </div>
+
+      <div *ngIf="isLoadingCategorias()" class="text-center text-muted py-3">
+        Carregando categorias...
+      </div>
+
+      <div
+        *ngIf="!isLoadingCategorias() && categorias().length === 0"
+        class="alert alert-info"
+      >
+        ℹ️ Nenhuma categoria cadastrada.
+      </div>
+
+      <div class="table-responsive" *ngIf="categorias().length > 0">
+        <table class="table table-striped align-middle">
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>Descrição</th>
+              <th>Status</th>
+              <th class="text-end">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let categoria of categorias()">
+              <td>
+                <div class="fw-semibold">{{ categoria.nome }}</div>
+              </td>
+              <td>{{ categoria.descricao || "-" }}</td>
+              <td>
+                <span
+                  class="badge"
+                  [class.bg-success]="categoria.ativa"
+                  [class.bg-secondary]="!categoria.ativa"
+                >
+                  {{ categoria.ativa ? "Ativa" : "Inativa" }}
+                </span>
+              </td>
+              <td class="text-end">
+                <button
+                  class="btn btn-outline-secondary btn-sm me-2"
+                  (click)="abrirModalEditarCategoria(categoria)"
+                >
+                  Editar
+                </button>
+                <button
+                  class="btn btn-outline-danger btn-sm"
+                  (click)="excluirCategoria(categoria.id!)"
+                >
+                  Remover
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Subcategorias -->
+    <div *ngIf="activeSubsection.startsWith('subcategorias')">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h6 class="m-0">Gerenciar Subcategorias</h6>
+        <button
+          class="btn btn-outline-primary btn-sm"
+          (click)="abrirModalNovaSubcategoria()"
+          *ngIf="activeSubsection === 'subcategorias-listar'"
+        >
+          <i class="bi bi-plus-lg"></i> Nova Subcategoria
+        </button>
+      </div>
+
+      <div *ngIf="isLoadingSubcategorias()" class="text-center text-muted py-3">
+        Carregando subcategorias...
+      </div>
+
+      <div
+        *ngIf="!isLoadingSubcategorias() && subcategorias().length === 0"
+        class="alert alert-info"
+      >
+        ℹ️ Nenhuma subcategoria cadastrada.
+      </div>
+
+      <div class="table-responsive" *ngIf="subcategorias().length > 0">
+        <table class="table table-striped align-middle">
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>Categoria</th>
+              <th>Status</th>
+              <th class="text-end">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let subcategoria of subcategorias()">
+              <td>
+                <div class="fw-semibold">{{ subcategoria.nome }}</div>
+              </td>
+              <td>{{ subcategoria.categoriaNome || "-" }}</td>
+              <td>
+                <span
+                  class="badge"
+                  [class.bg-success]="subcategoria.ativa"
+                  [class.bg-secondary]="!subcategoria.ativa"
+                >
+                  {{ subcategoria.ativa ? "Ativa" : "Inativa" }}
+                </span>
+              </td>
+              <td class="text-end">
+                <button
+                  class="btn btn-outline-secondary btn-sm me-2"
+                  (click)="abrirModalEditarSubcategoria(subcategoria)"
+                >
+                  Editar
+                </button>
+                <button
+                  class="btn btn-outline-danger btn-sm"
+                  (click)="excluirSubcategoria(subcategoria.id!)"
+                >
+                  Remover
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Segmentos -->
+    <div *ngIf="activeSubsection.startsWith('segmentos')">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h6 class="m-0">Gerenciar Segmentos</h6>
+        <button
+          class="btn btn-outline-primary btn-sm"
+          (click)="abrirModalNovoSegmento()"
+          *ngIf="activeSubsection === 'segmentos-listar'"
+        >
+          <i class="bi bi-plus-lg"></i> Novo Segmento
+        </button>
+      </div>
+
+      <div *ngIf="isLoadingSegmentos()" class="text-center text-muted py-3">
+        Carregando segmentos...
+      </div>
+
+      <div
+        *ngIf="!isLoadingSegmentos() && segmentos().length === 0"
+        class="alert alert-info"
+      >
+        ℹ️ Nenhum segmento cadastrado.
+      </div>
+
+      <div class="table-responsive" *ngIf="segmentos().length > 0">
+        <table class="table table-striped align-middle">
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>Descrição</th>
+              <th>Status</th>
+              <th class="text-end">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let segmento of segmentos()">
+              <td>
+                <div class="fw-semibold">{{ segmento.nome }}</div>
+              </td>
+              <td>{{ segmento.descricao || "-" }}</td>
+              <td>
+                <span
+                  class="badge"
+                  [class.bg-success]="segmento.ativa"
+                  [class.bg-secondary]="!segmento.ativa"
+                >
+                  {{ segmento.ativa ? "Ativo" : "Inativo" }}
+                </span>
+              </td>
+              <td class="text-end">
+                <button
+                  class="btn btn-outline-secondary btn-sm me-2"
+                  (click)="abrirModalEditarSegmento(segmento)"
+                >
+                  Editar
+                </button>
+                <button
+                  class="btn btn-outline-danger btn-sm"
+                  (click)="excluirSegmento(segmento.id!)"
+                >
+                  Remover
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Produtos -->
+    <div *ngIf="activeSubsection.startsWith('produtos')">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h6 class="m-0">Gerenciar Produtos</h6>
+        <button
+          class="btn btn-outline-primary btn-sm"
+          (click)="abrirModalNovoProduto()"
+          *ngIf="activeSubsection === 'produtos-listar'"
+        >
+          <i class="bi bi-plus-lg"></i> Novo Produto
+        </button>
+      </div>
+
+      <div *ngIf="isLoadingProdutos()" class="text-center text-muted py-3">
+        Carregando produtos...
+      </div>
+
+      <div
+        *ngIf="!isLoadingProdutos() && produtos().length === 0"
+        class="alert alert-info"
+      >
+        ℹ️ Nenhum produto cadastrado.
+      </div>
+
+      <div class="table-responsive" *ngIf="produtos().length > 0">
+        <table class="table table-striped align-middle">
+          <thead>
+            <tr>
+              <th>Imagem</th>
+              <th>Nome</th>
+              <th>Preço</th>
+              <th>Status</th>
+              <th class="text-end">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let produto of produtos()">
+              <td>
+                <img
+                  [src]="
+                    formatarUrlImagemProduto(getImagemPrincipalProduto(produto))
+                  "
+                  [alt]="produto.nome"
+                  style="width: 50px; height: 50px; object-fit: cover"
+                  (error)="tratarErroImagemProduto($event)"
+                />
+              </td>
+              <td>
+                <div class="fw-semibold">{{ produto.nome }}</div>
+              </td>
+              <td>
+                {{ formatarPreco(produto.precoVenda || produto.precoDe || 0) }}
+              </td>
+              <td>
+                <span
+                  class="badge"
+                  [class.bg-success]="produto.ativo"
+                  [class.bg-secondary]="!produto.ativo"
+                >
+                  {{ produto.ativo ? "Ativo" : "Inativo" }}
+                </span>
+              </td>
+              <td class="text-end">
+                <button
+                  class="btn btn-outline-secondary btn-sm me-2"
+                  (click)="abrirModalEditarProduto(produto)"
+                >
+                  Editar
+                </button>
+                <button
+                  class="btn btn-outline-danger btn-sm"
+                  (click)="excluirProduto(produto.id!)"
+                >
+                  Remover
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+<div
+  *ngIf="showModalCarrosselDestaque()"
+  class="modal-backdrop fade show"
+  (click)="fecharModalCarrosselDestaque()"
+></div>

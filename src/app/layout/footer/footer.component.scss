@@ -1,0 +1,63 @@
+.site-footer {
+  background: #111827;
+  color: #d1d5db;
+  padding: 40px 0 16px;
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 16px;
+  }
+
+  .cols {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin-bottom: 24px;
+  }
+
+  h4 {
+    color: #ffffff;
+    margin: 0 0 12px;
+  }
+
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  a {
+    color: #d1d5db;
+    text-decoration: none;
+  }
+
+  .newsletter {
+    display: flex;
+    gap: 8px;
+
+    input {
+      flex: 1;
+      padding: 8px 12px;
+      border: 1px solid #374151;
+      background: #111827;
+      color: #f9fafb;
+    }
+
+    button {
+      padding: 8px 12px;
+      border: none;
+      background: #f59e0b;
+      color: #111827;
+      font-weight: 600;
+      cursor: pointer;
+    }
+  }
+
+  .copy {
+    border-top: 1px solid #1f2937;
+    padding-top: 12px;
+    text-align: center;
+    font-size: 14px;
+  }
+}

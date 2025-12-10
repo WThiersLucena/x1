@@ -1,0 +1,330 @@
+<div class="indicadores-produtos-component">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h5 class="mb-0 fw-bold">
+      <i class="bi bi-box-seam me-2 text-success"></i>
+      Indicadores de Produtos
+    </h5>
+    <div class="btn-group btn-group-sm" role="group">
+      <button
+        type="button"
+        class="btn"
+        [class.btn-success]="periodo() === 'hoje'"
+        [class.btn-outline-success]="periodo() !== 'hoje'"
+        (click)="alterarPeriodo('hoje')"
+      >
+        Hoje
+      </button>
+      <button
+        type="button"
+        class="btn"
+        [class.btn-success]="periodo() === 'semana'"
+        [class.btn-outline-success]="periodo() !== 'semana'"
+        (click)="alterarPeriodo('semana')"
+      >
+        7 dias
+      </button>
+      <button
+        type="button"
+        class="btn"
+        [class.btn-success]="periodo() === 'mes'"
+        [class.btn-outline-success]="periodo() !== 'mes'"
+        (click)="alterarPeriodo('mes')"
+      >
+        30 dias
+      </button>
+      <button
+        type="button"
+        class="btn"
+        [class.btn-success]="periodo() === 'ano'"
+        [class.btn-outline-success]="periodo() !== 'ano'"
+        (click)="alterarPeriodo('ano')"
+      >
+        Ano
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="isLoading()" class="text-center py-5">
+    <div class="spinner-border text-success" role="status">
+      <span class="visually-hidden">Carregando...</span>
+    </div>
+    <p class="mt-3 text-muted">Carregando indicadores...</p>
+  </div>
+
+  <div *ngIf="!isLoading() && indicadores(); let dados">
+    <!-- Cards de Resumo -->
+    <div class="row g-3 mb-4">
+      <div class="col-md-3 col-sm-6">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <div>
+                <h6 class="text-muted mb-1 small">Total de Produtos</h6>
+                <h4 class="mb-0 fw-bold">{{ dados.totalProdutos }}</h4>
+              </div>
+              <div class="badge bg-primary bg-opacity-10 text-primary">
+                <i class="bi bi-box"></i>
+              </div>
+            </div>
+            <div class="text-muted small">
+              <span class="text-success">{{ dados.produtosAtivos }}</span> ativos | 
+              <span class="text-secondary">{{ dados.produtosInativos }}</span> inativos
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-3 col-sm-6">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <div>
+                <h6 class="text-muted mb-1 small">Produtos sem Estoque</h6>
+                <h4 class="mb-0 fw-bold" [class.text-danger]="dados.produtosSemEstoque > 0">
+                  {{ dados.produtosSemEstoque }}
+                </h4>
+              </div>
+              <div class="badge bg-danger bg-opacity-10 text-danger">
+                <i class="bi bi-exclamation-triangle"></i>
+              </div>
+            </div>
+            <div class="text-muted small" *ngIf="dados.produtosSemEstoque > 0">
+              <i class="bi bi-exclamation-circle"></i> Atenção necessária
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-3 col-sm-6">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <div>
+                <h6 class="text-muted mb-1 small">Produtos em Destaque</h6>
+                <h4 class="mb-0 fw-bold">{{ dados.produtosDestaque.quantidade }}</h4>
+              </div>
+              <div class="badge bg-warning bg-opacity-10 text-warning">
+                <i class="bi bi-star-fill"></i>
+              </div>
+            </div>
+            <div class="text-muted small">
+              Receita: {{ formatarMoeda(dados.produtosDestaque.receitaGerada) }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-3 col-sm-6">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <div>
+                <h6 class="text-muted mb-1 small">Mais Vendidos</h6>
+                <h4 class="mb-0 fw-bold">{{ dados.produtosMaisVendidos.quantidade }}</h4>
+              </div>
+              <div class="badge bg-info bg-opacity-10 text-info">
+                <i class="bi bi-trophy-fill"></i>
+              </div>
+            </div>
+            <div class="text-muted small">
+              Receita: {{ formatarMoeda(dados.produtosMaisVendidos.receitaGerada) }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabelas -->
+    <div class="row g-4">
+      <!-- Top 10 Produtos por Quantidade -->
+      <div class="col-md-6">
+        <div class="card border-0 shadow-sm">
+          <div class="card-header bg-white border-bottom">
+            <h6 class="mb-0 fw-semibold">Top 10 Produtos por Quantidade</h6>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table table-sm mb-0">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Produto</th>
+                    <th class="text-end">Quantidade</th>
+                    <th class="text-end">Receita</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let produto of dados.topProdutosQuantidade; let i = index">
+                    <td>
+                      <span class="badge bg-primary">{{ i + 1 }}</span>
+                    </td>
+                    <td>{{ produto.nome }}</td>
+                    <td class="text-end">{{ produto.quantidadeVendida }}</td>
+                    <td class="text-end">{{ formatarMoeda(produto.receitaGerada) }}</td>
+                  </tr>
+                  <tr *ngIf="dados.topProdutosQuantidade.length === 0">
+                    <td colspan="4" class="text-center text-muted py-3">
+                      Nenhum produto vendido no período
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Top 10 Produtos por Receita -->
+      <div class="col-md-6">
+        <div class="card border-0 shadow-sm">
+          <div class="card-header bg-white border-bottom">
+            <h6 class="mb-0 fw-semibold">Top 10 Produtos por Receita</h6>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table table-sm mb-0">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Produto</th>
+                    <th class="text-end">Receita</th>
+                    <th class="text-end">Quantidade</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let produto of dados.topProdutosReceita; let i = index">
+                    <td>
+                      <span class="badge bg-success">{{ i + 1 }}</span>
+                    </td>
+                    <td>{{ produto.nome }}</td>
+                    <td class="text-end fw-bold text-success">
+                      {{ formatarMoeda(produto.receitaTotal) }}
+                    </td>
+                    <td class="text-end">{{ produto.quantidadeVendida }}</td>
+                  </tr>
+                  <tr *ngIf="dados.topProdutosReceita.length === 0">
+                    <td colspan="4" class="text-center text-muted py-3">
+                      Nenhum produto vendido no período
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Vendas por Categoria -->
+      <div class="col-md-12">
+        <div class="card border-0 shadow-sm">
+          <div class="card-header bg-white border-bottom">
+            <h6 class="mb-0 fw-semibold">Vendas por Categoria</h6>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table table-sm mb-0">
+                <thead>
+                  <tr>
+                    <th>Categoria</th>
+                    <th class="text-end">Quantidade Vendida</th>
+                    <th class="text-end">Receita Gerada</th>
+                    <th class="text-end">Percentual</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let item of dados.vendasPorCategoria">
+                    <td><strong>{{ item.categoriaNome }}</strong></td>
+                    <td class="text-end">{{ item.quantidadeVendida }}</td>
+                    <td class="text-end">{{ formatarMoeda(item.receitaGerada) }}</td>
+                    <td class="text-end">{{ formatarPercentual(item.percentual) }}</td>
+                  </tr>
+                  <tr *ngIf="dados.vendasPorCategoria.length === 0">
+                    <td colspan="4" class="text-center text-muted py-3">
+                      Nenhuma venda por categoria no período
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Produtos com Maior Margem -->
+      <div class="col-md-6">
+        <div class="card border-0 shadow-sm">
+          <div class="card-header bg-white border-bottom">
+            <h6 class="mb-0 fw-semibold">Produtos com Maior Margem de Lucro</h6>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table table-sm mb-0">
+                <thead>
+                  <tr>
+                    <th>Produto</th>
+                    <th class="text-end">Margem %</th>
+                    <th class="text-end">Lucro Absoluto</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let produto of dados.produtosMaiorMargem">
+                    <td>{{ produto.nome }}</td>
+                    <td class="text-end text-success fw-bold">
+                      {{ formatarPercentual(produto.margemLucro) }}
+                    </td>
+                    <td class="text-end">{{ formatarMoeda(produto.lucroAbsoluto) }}</td>
+                  </tr>
+                  <tr *ngIf="dados.produtosMaiorMargem.length === 0">
+                    <td colspan="3" class="text-center text-muted py-3">
+                      Nenhum dado disponível
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Faixa de Preço Mais Vendida -->
+      <div class="col-md-6">
+        <div class="card border-0 shadow-sm">
+          <div class="card-header bg-white border-bottom">
+            <h6 class="mb-0 fw-semibold">Faixa de Preço Mais Vendida</h6>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table table-sm mb-0">
+                <thead>
+                  <tr>
+                    <th>Faixa de Preço</th>
+                    <th class="text-end">Quantidade</th>
+                    <th class="text-end">Receita</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let item of dados.faixaPrecoMaisVendida">
+                    <td><strong>{{ item.faixa }}</strong></td>
+                    <td class="text-end">{{ item.quantidade }}</td>
+                    <td class="text-end">{{ formatarMoeda(item.receita) }}</td>
+                  </tr>
+                  <tr *ngIf="dados.faixaPrecoMaisVendida.length === 0">
+                    <td colspan="3" class="text-center text-muted py-3">
+                      Nenhum dado disponível
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="!isLoading() && !indicadores()" class="alert alert-warning">
+    <i class="bi bi-exclamation-triangle me-2"></i>
+    Não foi possível carregar os indicadores de produtos.
+  </div>
+</div>
+

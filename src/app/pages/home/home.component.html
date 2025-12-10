@@ -1,0 +1,58 @@
+<section class="page home">
+  <!-- Carrossel de Destaques  -->
+  <app-hero-carousel
+    [slides]="heroSlides"
+    [interval]="4000"
+  ></app-hero-carousel>
+
+  <!-- Carrossel de Produtos Mais Vendidos -->
+  <app-carousel
+    class="mt-30"
+    title="Mais Vendidos"
+    [items]="maisVendidos"
+    [visible]="5"
+    [step]="2"
+    [interval]="3500"
+    [showDetailsButton]="true"
+    (viewDetails)="abrirModalDetalhes($event)"
+  ></app-carousel>
+
+  <!-- Carrossel de Outlet - Modelo 1 (Minimalista) -->
+  <app-carousel
+    class="mt-30"
+    title="Outlet - Modelo 1"
+    [items]="outlet"
+    [visible]="4"
+    [step]="2"
+    [interval]="3500"
+    [cardModel]="'modelo1'"
+  ></app-carousel>
+
+  <!-- Carrossel de Outlet - Modelo 2 (Elegante) -->
+  <app-carousel
+    class="mt-30"
+    title="Outlet - Modelo 2"
+    [items]="outletModelo2"
+    [visible]="4"
+    [step]="2"
+    [interval]="3500"
+    [cardModel]="'modelo2'"
+  ></app-carousel>
+
+  <!-- Carrossel de Papelaria -->
+  <app-carousel
+    class="mt-30"
+    title="Papelaria"
+    [items]="stationery"
+    [visible]="4"
+    [step]="2"
+    [interval]="3500"
+  ></app-carousel>
+
+  <!-- Modal de Detalhes do Produto -->
+  <app-product-detail-modal
+    [produto]="produtoSelecionado"
+    [show]="mostrarModal"
+    (close)="fecharModal()"
+  ></app-product-detail-modal>
+</section>

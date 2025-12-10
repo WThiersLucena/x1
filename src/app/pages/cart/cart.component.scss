@@ -1,0 +1,23 @@
+.cart {
+  h1 {
+    margin: 0 0 8px;
+  }
+
+  .btn-qty-plus:hover {
+    background-color: #16a34a; /* verde */
+    color: #ffffff;
+    border-color: #16a34a;
+  }
+
+  .btn-qty-minus:hover {
+    background-color: #bfdbfe; /* azul claro */
+    color: #1f2937;
+    border-color: #bfdbfe;
+  }
+
+  // Estilo para imagem clicável
+  img[style*="cursor: pointer"]:hover {
+    transform: scale(1.05);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  }
+}

@@ -1,0 +1,418 @@
+.account-container {
+  max-width: 100%;
+  margin: 0;
+  padding-left: 0;
+  padding-right: 0;
+  
+  .container-fluid {
+    padding-left: 2rem;
+    padding-right: 2rem;
+    
+    @media (max-width: 768px) {
+      padding-left: 1rem;
+      padding-right: 1rem;
+    }
+  }
+}
+
+.account {
+  h1 {
+    margin: 0 0 8px;
+  }
+
+  .btn-toggle-menu {
+    display: none; /* Oculto em mobile */
+    
+    @media (min-width: 992px) {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      padding: 0;
+      border-radius: 8px;
+      font-size: 1.2rem;
+      transition: all 0.3s ease;
+      
+      &:hover {
+        background-color: #111827;
+        color: #ffffff;
+        border-color: #111827;
+      }
+      
+      span {
+        display: inline-block;
+        transition: transform 0.3s ease;
+        
+        &.rotated {
+          transform: rotate(90deg);
+        }
+      }
+    }
+  }
+
+  .a-sidemenu {
+    display: flex;
+    gap: 8px;
+    flex-direction: column;
+    transition: opacity 0.3s ease, transform 0.3s ease, max-width 0.3s ease, width 0.3s ease;
+    overflow: hidden;
+    width: 100%;
+    
+    &.menu-hidden {
+      @media (min-width: 992px) {
+        opacity: 0;
+        max-width: 0;
+        width: 0;
+        transform: translateX(-20px);
+        pointer-events: none;
+      }
+    }
+  }
+
+  aside.menu-fechado {
+    @media (min-width: 992px) {
+      max-width: 0 !important;
+      width: 0 !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      overflow: hidden;
+      flex: 0 0 0 !important;
+    }
+  }
+
+  .a-sidemenu__item {
+    text-align: left;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    color: #111827;
+    padding: 10px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.15s ease-in-out, color 0.15s ease-in-out,
+      border-color 0.15s ease-in-out;
+  }
+
+  .a-sidemenu__item:hover {
+    background: #111827;
+    color: #ffffff;
+    border-color: #111827;
+  }
+
+  .a-sidemenu__item.is-active {
+    background: #111827;
+    color: #ffffff;
+    border-color: #111827;
+  }
+
+  /* Estilos para seção administrativa com acordeons */
+  .a-sidemenu__admin-section {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .a-sidemenu__item--admin {
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    
+    .a-sidemenu__accordion-icon {
+      font-size: 0.75rem;
+      transition: transform 0.2s ease;
+      margin-left: auto;
+    }
+  }
+
+  .a-sidemenu__accordion {
+    margin-top: 4px;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .a-sidemenu__accordion-header {
+    width: 100%;
+    text-align: left;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    color: #374151;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.15s ease-in-out;
+    font-size: 0.875rem;
+    font-weight: 500;
+
+    &:hover {
+      background: #f3f4f6;
+      border-color: #d1d5db;
+    }
+
+    .a-sidemenu__accordion-icon {
+      font-size: 0.75rem;
+      transition: transform 0.2s ease;
+    }
+  }
+
+  .a-sidemenu__accordion-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease, padding 0.3s ease;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 4px;
+
+    &.is-open {
+      max-height: 300px;
+      padding: 4px 0;
+    }
+  }
+
+  .a-sidemenu__subitem {
+    text-align: left;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    color: #6b7280;
+    padding: 8px 12px 8px 24px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s ease-in-out;
+    font-size: 0.8125rem;
+    font-weight: 400;
+
+    &:hover {
+      background: #f9fafb;
+      color: #111827;
+      border-color: #d1d5db;
+    }
+
+    &.is-active {
+      background: #111827;
+      color: #ffffff;
+      border-color: #111827;
+      font-weight: 500;
+    }
+  }
+
+  .a-panel {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 16px;
+  }
+}
+
+// ============================================================================
+// ESTILOS PARA MODAIS
+// ============================================================================
+
+.modal {
+  &.show {
+    display: block !important;
+    animation: fadeIn 0.15s ease-in;
+  }
+
+  .modal-dialog {
+    animation: slideDown 0.15s ease-out;
+  }
+
+  .modal-content {
+    border-radius: 12px;
+    border: none;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  }
+
+  .modal-header {
+    background-color: #f9fafb;
+    border-bottom: 1px solid #e5e7eb;
+    border-radius: 12px 12px 0 0;
+    padding: 16px 20px;
+
+    .modal-title {
+      font-weight: 600;
+      color: #111827;
+      font-size: 1.125rem;
+    }
+
+    .btn-close {
+      padding: 0.5rem;
+      margin: -0.5rem -0.5rem -0.5rem auto;
+    }
+  }
+
+  .modal-body {
+    padding: 20px;
+    color: #374151;
+
+    .form-label {
+      font-weight: 500;
+      color: #374151;
+      margin-bottom: 0.5rem;
+    }
+
+    .form-control,
+    .form-select {
+      border-radius: 8px;
+      border: 1px solid #d1d5db;
+      padding: 0.625rem 0.875rem;
+      font-size: 0.9375rem;
+      transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+
+      &:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+      }
+
+      &.is-invalid {
+        border-color: #ef4444;
+
+        &:focus {
+          box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+        }
+      }
+    }
+
+    .text-danger {
+      color: #dc2626;
+      font-size: 0.8125rem;
+    }
+  }
+
+  .modal-footer {
+    background-color: #f9fafb;
+    border-top: 1px solid #e5e7eb;
+    border-radius: 0 0 12px 12px;
+    padding: 16px 20px;
+
+    .btn {
+      padding: 0.5rem 1.25rem;
+      border-radius: 8px;
+      font-weight: 500;
+      font-size: 0.9375rem;
+    }
+  }
+}
+
+.modal-backdrop {
+  &.show {
+    opacity: 0.5;
+    animation: fadeIn 0.15s ease-in;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 0.5;
+  }
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+// ============================================================================
+// MELHORIAS NAS TABELAS
+// ============================================================================
+
+.table {
+  th {
+    font-weight: 600;
+    color: #374151;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+    padding: 12px 16px;
+    background-color: #f9fafb;
+    border-bottom: 2px solid #e5e7eb;
+  }
+
+  td {
+    padding: 12px 16px;
+    vertical-align: middle;
+    color: #111827;
+  }
+
+  .badge {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    border-radius: 6px;
+  }
+
+  .btn-sm {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.8125rem;
+    border-radius: 6px;
+    font-weight: 500;
+  }
+}
+
+// Melhorias nos botões de ação
+.btn-outline-primary {
+  &:hover {
+    background-color: #3b82f6;
+    border-color: #3b82f6;
+  }
+}
+
+.btn-outline-secondary {
+  &:hover {
+    background-color: #6b7280;
+    border-color: #6b7280;
+  }
+}
+
+.btn-outline-danger {
+  &:hover {
+    background-color: #ef4444;
+    border-color: #ef4444;
+  }
+}
+
+// ============================================================================
+// ESTILOS PARA CAMPO CEP COM BUSCA AUTOMÁTICA
+// ============================================================================
+
+.form-label {
+  .spinner-border-sm {
+    width: 0.875rem;
+    height: 0.875rem;
+    border-width: 0.15em;
+    vertical-align: middle;
+  }
+}
+
+.text-primary {
+  color: #3b82f6 !important;
+}
+
+// Animação de pulse para o texto de busca
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+.small.text-primary {
+  animation: pulse 1.5s ease-in-out infinite;
+}

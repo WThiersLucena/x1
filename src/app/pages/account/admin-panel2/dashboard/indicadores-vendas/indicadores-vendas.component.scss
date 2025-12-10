@@ -1,0 +1,35 @@
+.indicadores-vendas-component {
+  .card {
+    transition: transform 0.2s, box-shadow 0.2s;
+    
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+    }
+  }
+
+  .badge {
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    font-size: 1.2rem;
+  }
+
+  .text-purple {
+    color: #6f42c1;
+  }
+
+  .bg-purple {
+    background-color: #6f42c1;
+  }
+
+  .table {
+    th {
+      font-weight: 600;
+      font-size: 0.875rem;
+      color: #6c757d;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+  }
+}
+

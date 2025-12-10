@@ -1,0 +1,63 @@
+<div class="gerenciar-carrossel-component">
+  <div class="mb-4">
+    <h6 class="m-0">Gerenciar Carrossel</h6>
+    <p class="text-muted small mb-0">
+      Gerencie os diferentes tipos de carrossel do site
+    </p>
+  </div>
+
+  <!-- Acordeon: Carrossel Novidades -->
+  <div class="accordion mb-3" id="accordionCarrossel">
+    <div class="accordion-item">
+      <h2 class="accordion-header">
+        <button
+          class="accordion-button"
+          [class.collapsed]="!isAccordionAberto('novidades')"
+          type="button"
+          (click)="toggleAccordion('novidades')"
+          [attr.aria-expanded]="isAccordionAberto('novidades')"
+          aria-controls="collapseNovidades"
+        >
+          🎠 Carrossel (Novidades)
+        </button>
+      </h2>
+      <div
+        id="collapseNovidades"
+        class="accordion-collapse collapse"
+        [class.show]="isAccordionAberto('novidades')"
+        [attr.aria-labelledby]="'headingNovidades'"
+      >
+        <div class="accordion-body">
+          <app-carrossel-novidades></app-carrossel-novidades>
+        </div>
+      </div>
+    </div>
+
+    <!-- Acordeon: Carrossel Mais Vendidos -->
+    <div class="accordion-item">
+      <h2 class="accordion-header">
+        <button
+          class="accordion-button"
+          [class.collapsed]="!isAccordionAberto('maisVendidos')"
+          type="button"
+          (click)="toggleAccordion('maisVendidos')"
+          [attr.aria-expanded]="isAccordionAberto('maisVendidos')"
+          aria-controls="collapseMaisVendidos"
+        >
+          🏆 Carrossel Mais Vendidos
+        </button>
+      </h2>
+      <div
+        id="collapseMaisVendidos"
+        class="accordion-collapse collapse"
+        [class.show]="isAccordionAberto('maisVendidos')"
+        [attr.aria-labelledby]="'headingMaisVendidos'"
+      >
+        <div class="accordion-body">
+          <app-carrossel-mais-vendidos></app-carrossel-mais-vendidos>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+

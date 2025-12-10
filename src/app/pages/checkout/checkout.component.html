@@ -1,0 +1,650 @@
+<section class="page checkout container py-4">
+  <h1 class="mb-4">Finalizar Pedido</h1>
+
+  <!-- Loading -->
+  <div *ngIf="isLoading()" class="text-center py-5">
+    <div class="spinner-border" role="status">
+      <span class="visually-hidden">Carregando...</span>
+    </div>
+    <p class="mt-3 text-muted">Carregando dados do checkout...</p>
+  </div>
+
+  <!-- Erro -->
+  <div *ngIf="error() && !isLoading()" class="alert alert-danger" role="alert">
+    <strong>Erro:</strong> {{ error() }}
+  </div>
+
+  <!-- Conteúdo Principal -->
+  <div *ngIf="!isLoading() && !error() && carrinho()" class="row g-4">
+    <!-- Formulário de Checkout -->
+    <div class="col-12 col-lg-8">
+      <form [formGroup]="checkoutForm" (ngSubmit)="finalizarPedido()">
+        <!-- Seleção de Endereço -->
+        <div class="card mb-4">
+          <div class="card-header">
+            <h5 class="mb-0">Endereço de Entrega</h5>
+          </div>
+          <div class="card-body">
+            <div *ngIf="enderecos().length === 0" class="alert alert-warning">
+              <p class="mb-2">
+                Você precisa cadastrar um endereço antes de finalizar o pedido.
+              </p>
+              <button
+                type="button"
+                class="btn btn-sm btn-primary"
+                (click)="adicionarEndereco()"
+              >
+                Cadastrar Endereço
+              </button>
+            </div>
+
+            <div *ngIf="enderecos().length > 0" class="mb-3">
+              <label for="enderecoId" class="form-label"
+                >Selecione o endereço de entrega:</label
+              >
+              <select
+                id="enderecoId"
+                formControlName="enderecoId"
+                class="form-select"
+                [class.is-invalid]="
+                  checkoutForm.get('enderecoId')?.invalid &&
+                  checkoutForm.get('enderecoId')?.touched
+                "
+              >
+                <option value="">Selecione um endereço</option>
+                <option
+                  *ngFor="let endereco of enderecos()"
+                  [value]="endereco.id"
+                >
+                  {{ formatarEndereco(endereco) }}
+                </option>
+              </select>
+              <div
+                *ngIf="
+                  checkoutForm.get('enderecoId')?.invalid &&
+                  checkoutForm.get('enderecoId')?.touched
+                "
+                class="invalid-feedback"
+              >
+                Selecione um endereço de entrega
+              </div>
+            </div>
+
+            <button
+              *ngIf="enderecos().length > 0"
+              type="button"
+              class="btn btn-sm btn-outline-primary"
+              (click)="adicionarEndereco()"
+            >
+              + Adicionar Novo Endereço
+            </button>
+          </div>
+        </div>
+
+        <!-- Forma de Pagamento -->
+        <div class="card mb-4">
+          <div class="card-header">
+            <h5 class="mb-0">Forma de Pagamento</h5>
+          </div>
+          <div class="card-body">
+            <label class="form-label mb-3"
+              >Selecione a forma de pagamento:</label
+            >
+
+            <!-- Accordions com radio buttons no header -->
+            <div class="accordion" id="accordionPagamento">
+              <!-- Cartão de Crédito -->
+              <div class="accordion-item">
+                <h2 class="accordion-header">
+                  <button
+                    class="accordion-button"
+                    type="button"
+                    [class.collapsed]="
+                      checkoutForm.get('formaPagamento')?.value !==
+                      'CARTAO_CREDITO'
+                    "
+                    data-bs-toggle="collapse"
+                    data-bs-target="#collapseCartaoCredito"
+                    [attr.aria-expanded]="
+                      checkoutForm.get('formaPagamento')?.value ===
+                      'CARTAO_CREDITO'
+                    "
+                    aria-controls="collapseCartaoCredito"
+                    (click)="
+                      checkoutForm.patchValue({
+                        formaPagamento: 'CARTAO_CREDITO'
+                      })
+                    "
+                  >
+                    <input
+                      class="form-check-input me-2"
+                      type="radio"
+                      [id]="'forma-CARTAO_CREDITO'"
+                      [value]="'CARTAO_CREDITO'"
+                      formControlName="formaPagamento"
+                      (click)="$event.stopPropagation()"
+                      [checked]="
+                        checkoutForm.get('formaPagamento')?.value ===
+                        'CARTAO_CREDITO'
+                      "
+                    />
+                    Cartão de Crédito
+                  </button>
+                </h2>
+                <div
+                  id="collapseCartaoCredito"
+                  class="accordion-collapse collapse"
+                  [class.show]="
+                    checkoutForm.get('formaPagamento')?.value ===
+                    'CARTAO_CREDITO'
+                  "
+                  data-bs-parent="#accordionPagamento"
+                >
+                  <div class="accordion-body">
+                    <form [formGroup]="cartaoForm">
+                      <div class="row g-3">
+                        <!-- Número do Cartão -->
+                        <div class="col-12">
+                          <label for="numeroCartao" class="form-label"
+                            >Número do Cartão</label
+                          >
+                          <div class="input-group">
+                            <input
+                              type="text"
+                              id="numeroCartao"
+                              class="form-control"
+                              formControlName="numeroCartao"
+                              placeholder="0000 0000 0000 0000"
+                              maxlength="19"
+                              (input)="formatarNumeroCartao($event)"
+                              [class.is-invalid]="
+                                cartaoForm.get('numeroCartao')?.invalid &&
+                                cartaoForm.get('numeroCartao')?.touched
+                              "
+                            />
+                            <span
+                              class="input-group-text"
+                              *ngIf="bandeiraCartao()"
+                            >
+                              <span class="badge bg-primary text-capitalize">{{
+                                bandeiraCartao()
+                              }}</span>
+                            </span>
+                          </div>
+                          <div
+                            *ngIf="
+                              cartaoForm.get('numeroCartao')?.invalid &&
+                              cartaoForm.get('numeroCartao')?.touched
+                            "
+                            class="invalid-feedback d-block"
+                          >
+                            Número do cartão inválido
+                          </div>
+                        </div>
+
+                        <!-- Nome do Titular -->
+                        <div class="col-12">
+                          <label for="nomeTitular" class="form-label"
+                            >Nome do Titular</label
+                          >
+                          <input
+                            type="text"
+                            id="nomeTitular"
+                            class="form-control"
+                            formControlName="nomeTitular"
+                            placeholder="NOME COMO ESTÁ NO CARTÃO"
+                            [class.is-invalid]="
+                              cartaoForm.get('nomeTitular')?.invalid &&
+                              cartaoForm.get('nomeTitular')?.touched
+                            "
+                          />
+                          <div
+                            *ngIf="
+                              cartaoForm.get('nomeTitular')?.invalid &&
+                              cartaoForm.get('nomeTitular')?.touched
+                            "
+                            class="invalid-feedback d-block"
+                          >
+                            Nome do titular é obrigatório
+                          </div>
+                        </div>
+
+                        <!-- Validade e CVV -->
+                        <div class="col-md-6">
+                          <label for="validade" class="form-label"
+                            >Validade</label
+                          >
+                          <input
+                            type="text"
+                            id="validade"
+                            class="form-control"
+                            formControlName="validade"
+                            placeholder="MM/AA"
+                            maxlength="5"
+                            (input)="formatarValidade($event)"
+                            [class.is-invalid]="
+                              cartaoForm.get('validade')?.invalid &&
+                              cartaoForm.get('validade')?.touched
+                            "
+                          />
+                          <div
+                            *ngIf="
+                              cartaoForm.get('validade')?.invalid &&
+                              cartaoForm.get('validade')?.touched
+                            "
+                            class="invalid-feedback d-block"
+                          >
+                            Validade inválida (MM/AA)
+                          </div>
+                        </div>
+
+                        <div class="col-md-6">
+                          <label for="cvv" class="form-label">CVV</label>
+                          <input
+                            type="text"
+                            id="cvv"
+                            class="form-control"
+                            formControlName="cvv"
+                            placeholder="123"
+                            maxlength="4"
+                            [class.is-invalid]="
+                              cartaoForm.get('cvv')?.invalid &&
+                              cartaoForm.get('cvv')?.touched
+                            "
+                          />
+                          <div
+                            *ngIf="
+                              cartaoForm.get('cvv')?.invalid &&
+                              cartaoForm.get('cvv')?.touched
+                            "
+                            class="invalid-feedback d-block"
+                          >
+                            CVV inválido
+                          </div>
+                        </div>
+
+                        <!-- Parcelas -->
+                        <div class="col-12">
+                          <label for="parcelas" class="form-label"
+                            >Parcelas</label
+                          >
+                          <select
+                            id="parcelas"
+                            class="form-select"
+                            formControlName="parcelas"
+                          >
+                            <option value="1">1x sem juros</option>
+                            <option value="2">2x sem juros</option>
+                            <option value="3">3x sem juros</option>
+                            <option value="4">4x sem juros</option>
+                            <option value="5">5x sem juros</option>
+                            <option value="6">6x sem juros</option>
+                          </select>
+                        </div>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+
+              <!-- PIX -->
+              <div class="accordion-item">
+                <h2 class="accordion-header">
+                  <button
+                    class="accordion-button"
+                    type="button"
+                    [class.collapsed]="
+                      checkoutForm.get('formaPagamento')?.value !== 'PIX'
+                    "
+                    data-bs-toggle="collapse"
+                    data-bs-target="#collapsePix"
+                    [attr.aria-expanded]="
+                      checkoutForm.get('formaPagamento')?.value === 'PIX'
+                    "
+                    aria-controls="collapsePix"
+                    (click)="checkoutForm.patchValue({ formaPagamento: 'PIX' })"
+                  >
+                    <input
+                      class="form-check-input me-2"
+                      type="radio"
+                      [id]="'forma-PIX'"
+                      [value]="'PIX'"
+                      formControlName="formaPagamento"
+                      (click)="$event.stopPropagation()"
+                      [checked]="
+                        checkoutForm.get('formaPagamento')?.value === 'PIX'
+                      "
+                    />
+                    PIX
+                  </button>
+                </h2>
+                <div
+                  id="collapsePix"
+                  class="accordion-collapse collapse"
+                  [class.show]="
+                    checkoutForm.get('formaPagamento')?.value === 'PIX'
+                  "
+                  data-bs-parent="#accordionPagamento"
+                >
+                  <div class="accordion-body">
+                    <div class="d-grid">
+                      <button
+                        type="button"
+                        class="btn btn-primary"
+                        (click)="gerarQrCodePix()"
+                        [disabled]="mostrarQrCodePix()"
+                      >
+                        <span *ngIf="!mostrarQrCodePix()">Gerar QR Code</span>
+                        <span *ngIf="mostrarQrCodePix()">QR Code Gerado</span>
+                      </button>
+                    </div>
+
+                    <div
+                      *ngIf="mostrarQrCodePix() && qrCodePix()"
+                      class="text-center mt-4 qr-code-container"
+                    >
+                      <p class="mb-3 fw-semibold">
+                        Escaneie o QR Code com o app do seu banco:
+                      </p>
+                      <img
+                        [src]="qrCodePix()"
+                        alt="QR Code PIX"
+                        class="img-fluid"
+                        style="max-width: 300px"
+                      />
+                      <p class="text-muted small mt-3">
+                        Este é um QR Code simulado para demonstração
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- WhatsApp -->
+              <div class="accordion-item">
+                <h2 class="accordion-header">
+                  <button
+                    class="accordion-button"
+                    type="button"
+                    [class.collapsed]="
+                      checkoutForm.get('formaPagamento')?.value !== 'WHATSAPP'
+                    "
+                    data-bs-toggle="collapse"
+                    data-bs-target="#collapseWhatsApp"
+                    [attr.aria-expanded]="
+                      checkoutForm.get('formaPagamento')?.value === 'WHATSAPP'
+                    "
+                    aria-controls="collapseWhatsApp"
+                    (click)="
+                      checkoutForm.patchValue({ formaPagamento: 'WHATSAPP' })
+                    "
+                  >
+                    <input
+                      class="form-check-input me-2"
+                      type="radio"
+                      [id]="'forma-WHATSAPP'"
+                      [value]="'WHATSAPP'"
+                      formControlName="formaPagamento"
+                      (click)="$event.stopPropagation()"
+                      [checked]="
+                        checkoutForm.get('formaPagamento')?.value === 'WHATSAPP'
+                      "
+                    />
+                    <span class="whatsapp-icon me-2">
+                      <svg
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                      >
+                        <path
+                          d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .96 4.534.96 10.08c0 1.792.413 3.47 1.155 4.983L.06 24l9.218-2.41a11.714 11.714 0 005.772 1.515h.005c6.554 0 11.09-5.533 11.09-11.088a11.821 11.821 0 00-3.48-8.413Z"
+                        />
+                      </svg>
+                    </span>
+                    WhatsApp
+                  </button>
+                </h2>
+                <div
+                  id="collapseWhatsApp"
+                  class="accordion-collapse collapse"
+                  [class.show]="
+                    checkoutForm.get('formaPagamento')?.value === 'WHATSAPP'
+                  "
+                  data-bs-parent="#accordionPagamento"
+                >
+                  <div class="accordion-body">
+                    <div class="alert alert-info mb-0">
+                      <strong>Conclua sua venda via WhatsApp.</strong>
+                      <p class="mb-0">
+                        Após finalizar o pedido, você será redirecionado para o
+                        nosso WhatsApp com o resumo do seu pedido.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Cartão de Débito -->
+              <div class="accordion-item">
+                <h2 class="accordion-header">
+                  <button
+                    class="accordion-button"
+                    type="button"
+                    [class.collapsed]="
+                      checkoutForm.get('formaPagamento')?.value !==
+                      'CARTAO_DEBITO'
+                    "
+                    data-bs-toggle="collapse"
+                    data-bs-target="#collapseCartaoDebito"
+                    [attr.aria-expanded]="
+                      checkoutForm.get('formaPagamento')?.value ===
+                      'CARTAO_DEBITO'
+                    "
+                    aria-controls="collapseCartaoDebito"
+                    (click)="
+                      checkoutForm.patchValue({
+                        formaPagamento: 'CARTAO_DEBITO'
+                      })
+                    "
+                  >
+                    <input
+                      class="form-check-input me-2"
+                      type="radio"
+                      [id]="'forma-CARTAO_DEBITO'"
+                      [value]="'CARTAO_DEBITO'"
+                      formControlName="formaPagamento"
+                      (click)="$event.stopPropagation()"
+                      [checked]="
+                        checkoutForm.get('formaPagamento')?.value ===
+                        'CARTAO_DEBITO'
+                      "
+                    />
+                    Cartão de Débito
+                  </button>
+                </h2>
+                <div
+                  id="collapseCartaoDebito"
+                  class="accordion-collapse collapse"
+                  [class.show]="
+                    checkoutForm.get('formaPagamento')?.value ===
+                    'CARTAO_DEBITO'
+                  "
+                  data-bs-parent="#accordionPagamento"
+                >
+                  <div class="accordion-body">
+                    <div class="alert alert-warning mb-0">
+                      <strong>Opção Desativada no momento</strong>
+                      <p class="mb-0">
+                        Esta forma de pagamento não está disponível no momento.
+                        Por favor, escolha outra opção.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Boleto -->
+              <div class="accordion-item">
+                <h2 class="accordion-header">
+                  <button
+                    class="accordion-button"
+                    type="button"
+                    [class.collapsed]="
+                      checkoutForm.get('formaPagamento')?.value !== 'BOLETO'
+                    "
+                    data-bs-toggle="collapse"
+                    data-bs-target="#collapseBoleto"
+                    [attr.aria-expanded]="
+                      checkoutForm.get('formaPagamento')?.value === 'BOLETO'
+                    "
+                    aria-controls="collapseBoleto"
+                    (click)="
+                      checkoutForm.patchValue({ formaPagamento: 'BOLETO' })
+                    "
+                  >
+                    <input
+                      class="form-check-input me-2"
+                      type="radio"
+                      [id]="'forma-BOLETO'"
+                      [value]="'BOLETO'"
+                      formControlName="formaPagamento"
+                      (click)="$event.stopPropagation()"
+                      [checked]="
+                        checkoutForm.get('formaPagamento')?.value === 'BOLETO'
+                      "
+                    />
+                    Boleto
+                  </button>
+                </h2>
+                <div
+                  id="collapseBoleto"
+                  class="accordion-collapse collapse"
+                  [class.show]="
+                    checkoutForm.get('formaPagamento')?.value === 'BOLETO'
+                  "
+                  data-bs-parent="#accordionPagamento"
+                >
+                  <div class="accordion-body">
+                    <div class="alert alert-warning mb-0">
+                      <strong>Opção Desativada no momento</strong>
+                      <p class="mb-0">
+                        Esta forma de pagamento não está disponível no momento.
+                        Por favor, escolha outra opção.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div
+              *ngIf="
+                checkoutForm.get('formaPagamento')?.invalid &&
+                checkoutForm.get('formaPagamento')?.touched
+              "
+              class="text-danger small mt-2"
+            >
+              Selecione uma forma de pagamento
+            </div>
+          </div>
+        </div>
+
+        <!-- Observações -->
+        <div class="card mb-4">
+          <div class="card-header">
+            <h5 class="mb-0">Observações (Opcional)</h5>
+          </div>
+          <div class="card-body">
+            <textarea
+              formControlName="observacoes"
+              class="form-control"
+              rows="3"
+              placeholder="Alguma observação sobre o pedido?"
+            ></textarea>
+          </div>
+        </div>
+
+        <!-- Botões de Ação -->
+        <div class="d-flex gap-2 mb-4">
+          <button
+            type="button"
+            class="btn btn-outline-secondary"
+            (click)="voltarParaCarrinho()"
+          >
+            ← Voltar ao Carrinho
+          </button>
+          <button
+            type="submit"
+            class="btn btn-primary flex-grow-1"
+            [disabled]="
+              isFinalizando() ||
+              checkoutForm.invalid ||
+              enderecos().length === 0
+            "
+          >
+            <span *ngIf="!isFinalizando()">Finalizar Pedido</span>
+            <span *ngIf="isFinalizando()">
+              <span
+                class="spinner-border spinner-border-sm me-2"
+                role="status"
+              ></span>
+              Finalizando...
+            </span>
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Resumo do Pedido -->
+    <div class="col-12 col-lg-4">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0">Resumo do Pedido</h5>
+        </div>
+        <div class="card-body">
+          <!-- Itens -->
+          <div class="mb-3">
+            <h6 class="small text-muted mb-2">Itens</h6>
+            <div
+              *ngFor="let item of carrinho()!.itens"
+              class="d-flex justify-content-between align-items-start mb-2 pb-2 border-bottom"
+            >
+              <div class="flex-grow-1">
+                <div class="fw-semibold small">{{ item.produtoNome }}</div>
+                <div class="text-muted small">
+                  {{ item.quantidade }}x {{ formatarValor(item.precoUnitario) }}
+                </div>
+              </div>
+              <div class="fw-semibold">
+                {{ formatarValor(calcularSubtotalItem(item)) }}
+              </div>
+            </div>
+          </div>
+
+          <!-- Totais -->
+          <div class="border-top pt-3">
+            <div class="d-flex justify-content-between mb-2">
+              <span>Subtotal:</span>
+              <span>{{ formatarValor(carrinho()!.subtotal) }}</span>
+            </div>
+            <div class="d-flex justify-content-between mb-2">
+              <span>Frete:</span>
+              <span>Grátis</span>
+            </div>
+            <div class="d-flex justify-content-between mb-2">
+              <span>Desconto:</span>
+              <span>R$ 0,00</span>
+            </div>
+            <div
+              class="d-flex justify-content-between fw-bold fs-5 border-top pt-2 mt-2"
+            >
+              <span>Total:</span>
+              <span>{{ formatarValor(carrinho()!.subtotal) }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

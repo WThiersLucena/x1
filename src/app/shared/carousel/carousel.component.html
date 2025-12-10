@@ -1,0 +1,166 @@
+<section class="c-carousel">
+  <h2 class="mb-2">{{ title }}</h2>
+
+  <div
+    [id]="id"
+    class="carousel slide"
+    [attr.data-bs-ride]="slides.length > 1 ? 'carousel' : null"
+    [attr.data-bs-interval]="slides.length > 1 ? interval : null"
+  >
+    <div class="carousel-inner">
+      <div
+        class="carousel-item"
+        *ngFor="let slide of slides; let i = index; trackBy: trackBySlide"
+        [class.active]="i === 0"
+      >
+        <div class="container">
+          <div
+            class="row g-3"
+            [class.row-modelo2]="cardModel === 'modelo2'"
+            [class.row-default-5]="showDetailsButton"
+          >
+            <div
+              [ngClass]="
+                cardModel === 'modelo2'
+                  ? 'col-6 col-md-2-4'
+                  : showDetailsButton
+                  ? 'col-6 col-md-2-4'
+                  : 'col-6 col-md-3'
+              "
+              *ngFor="let it of slide; trackBy: trackById"
+            >
+              <div
+                class="o-card h-100"
+                [class.o-card--modelo1]="cardModel === 'modelo1'"
+                [class.o-card--modelo2]="cardModel === 'modelo2'"
+              >
+                <!-- Badge de Desconto (mostrar quando houver desconto) -->
+                <div
+                  class="o-card__badge"
+                  *ngIf="calcularDesconto(it) !== null"
+                >
+                  {{ calcularDesconto(it) }}% OFF
+                </div>
+                <div class="o-card__like">
+                  <button
+                    type="button"
+                    class="o-card__icon-btn"
+                    [disabled]="
+                      !showDetailsButton
+                        ? !getSelectedSize(it)
+                        : isItemInCart(it)
+                    "
+                    [class.disabled]="isItemInCart(it)"
+                    (click)="
+                      showDetailsButton
+                        ? addToCartWithoutSize($event, it)
+                        : quickAddToCart($event, it)
+                    "
+                    [title]="
+                      isItemInCart(it)
+                        ? 'Item já está na cesta'
+                        : 'Adicionar à cesta'
+                    "
+                    aria-label="Adicionar rapidamente à cesta"
+                  >
+                    <img
+                      src="/assets/icons/bolsa-de-compras-cheia.png"
+                      alt="Adicionar à cesta"
+                      width="18"
+                      height="18"
+                    />
+                  </button>
+                </div>
+                <div class="o-card__media">
+                  <img
+                    class="o-card__img"
+                    [src]="formatarUrlImagem(it.imageUrl)"
+                    [alt]="it.title"
+                    (error)="onImageError($event)"
+                  />
+                </div>
+                <div class="o-card__body">
+                  <div class="o-card__title">{{ it.title }}</div>
+                  <div
+                    class="o-card__pricing"
+                    *ngIf="it.price || it.previousPrice"
+                  >
+                    <div class="o-card__previous" *ngIf="it.previousPrice">
+                      De {{ it.previousPrice }}
+                    </div>
+                    <div class="o-card__label" *ngIf="it.price">Por</div>
+                    <div class="o-card__price">{{ it.price }}</div>
+                  </div>
+                  <div class="o-card__sizes" *ngIf="!showDetailsButton">
+                    <button
+                      type="button"
+                      class="o-card__size-btn"
+                      [class.is-selected]="getSelectedSize(it) === 'P'"
+                      (click)="selectSize(it, 'P')"
+                    >
+                      P
+                    </button>
+                    <button
+                      type="button"
+                      class="o-card__size-btn"
+                      [class.is-selected]="getSelectedSize(it) === 'M'"
+                      (click)="selectSize(it, 'M')"
+                    >
+                      M
+                    </button>
+                    <button
+                      type="button"
+                      class="o-card__size-btn"
+                      [class.is-selected]="getSelectedSize(it) === 'G'"
+                      (click)="selectSize(it, 'G')"
+                    >
+                      G
+                    </button>
+                  </div>
+                  <div class="d-grid mt-2">
+                    <button
+                      *ngIf="!showDetailsButton"
+                      type="button"
+                      class="btn btn-dark btn-sm"
+                      [disabled]="!getSelectedSize(it)"
+                      (click)="addToCart(it)"
+                    >
+                      Adicionar à cesta
+                    </button>
+                    <button
+                      *ngIf="showDetailsButton"
+                      type="button"
+                      class="btn btn-primary btn-sm"
+                      (click)="verDetalhes(it)"
+                    >
+                      Ver Detalhes
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <button
+      class="carousel-control-prev"
+      type="button"
+      [attr.data-bs-target]="'#' + id"
+      data-bs-slide="prev"
+    >
+      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Anterior</span>
+    </button>
+    <button
+      class="carousel-control-next"
+      type="button"
+      [attr.data-bs-target]="'#' + id"
+      data-bs-slide="next"
+    >
+      <span class="carousel-control-next-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Próximo</span>
+    </button>
+  </div>
+</section>

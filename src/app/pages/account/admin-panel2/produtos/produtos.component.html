@@ -1,0 +1,776 @@
+<div class="produtos-component">
+  <!-- Cabeçalho -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h6 class="m-0">Gerenciar Produtos</h6>
+    <button
+      class="btn btn-outline-primary btn-sm"
+      (click)="abrirModalNovo()"
+    >
+      <i class="bi bi-plus-lg"></i> Novo Produto
+    </button>
+  </div>
+
+  <!-- Barra de busca e filtros -->
+  <div class="row mb-3">
+    <div class="col-md-6">
+      <div class="input-group">
+        <input
+          type="text"
+          class="form-control"
+          placeholder="Buscar por nome..."
+          [value]="busca()"
+          (input)="busca.set($any($event.target).value)"
+          (keyup.enter)="onBuscar()"
+        />
+        <button
+          class="btn btn-outline-secondary"
+          type="button"
+          (click)="onBuscar()"
+          title="Buscar"
+        >
+          <i class="bi bi-search"></i>
+        </button>
+        <button
+          class="btn btn-outline-secondary"
+          type="button"
+          (click)="limparBusca()"
+          title="Limpar busca"
+          *ngIf="busca()"
+        >
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="btn-group" role="group">
+        <button
+          type="button"
+          class="btn btn-sm"
+          [class.btn-primary]="filtroAtivos() === null"
+          [class.btn-outline-primary]="filtroAtivos() !== null"
+          (click)="filtrarPorStatus(null)"
+        >
+          Todos
+        </button>
+        <button
+          type="button"
+          class="btn btn-sm"
+          [class.btn-success]="filtroAtivos() === true"
+          [class.btn-outline-success]="filtroAtivos() !== true"
+          (click)="filtrarPorStatus(true)"
+        >
+          Ativos
+        </button>
+        <button
+          type="button"
+          class="btn btn-sm"
+          [class.btn-secondary]="filtroAtivos() === false"
+          [class.btn-outline-secondary]="filtroAtivos() !== false"
+          (click)="filtrarPorStatus(false)"
+        >
+          Inativos
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="isLoading()" class="text-center text-muted py-3">
+    <div class="spinner-border spinner-border-sm" role="status">
+      <span class="visually-hidden">Carregando...</span>
+    </div>
+    <p class="mt-2 mb-0">Carregando produtos...</p>
+  </div>
+
+  <!-- Lista vazia -->
+  <div
+    *ngIf="!isLoading() && produtos().length === 0"
+    class="alert alert-info"
+  >
+    ℹ️ Nenhum produto encontrado.
+  </div>
+
+  <!-- Tabela -->
+  <div
+    class="table-responsive"
+    *ngIf="!isLoading() && produtos().length > 0"
+  >
+    <table class="table table-striped align-middle">
+      <thead>
+        <tr>
+          <th width="80">Imagem</th>
+          <th>Nome</th>
+          <th>Segmento</th>
+          <th>Fornecedor</th>
+          <th>Preço</th>
+          <th>Status</th>
+          <th width="200" class="text-center">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let produto of produtos()">
+          <td>
+            <img
+              [src]="getImagemPrincipal(produto)"
+              [alt]="produto.nome"
+              class="img-thumbnail"
+              style="width: 50px; height: 50px; object-fit: cover;"
+              (error)="onImageError($event)"
+              onerror="this.src='/assets/logo/Logo-Thiers.png'"
+            />
+          </td>
+          <td>
+            <div class="fw-semibold">{{ produto.nome }}</div>
+            <small class="text-muted" *ngIf="produto.descricao">
+              {{ produto.descricao && produto.descricao.length > 50 ? (produto.descricao.substring(0, 50) + '...') : produto.descricao }}
+            </small>
+          </td>
+          <td>{{ produto.segmentoNome || "-" }}</td>
+          <td>{{ produto.fornecedorNome || "-" }}</td>
+          <td>
+            <div class="fw-semibold">{{ formatarPreco(produto.precoVenda || 0) }}</div>
+            <small class="text-muted" *ngIf="produto.precoDe && produto.precoVenda && produto.precoDe > produto.precoVenda">
+              De: {{ formatarPreco(produto.precoDe) }}
+            </small>
+          </td>
+          <td>
+            <span
+              class="badge"
+              [class.bg-success]="produto.ativo"
+              [class.bg-secondary]="!produto.ativo"
+            >
+              {{ produto.ativo ? "Ativo" : "Inativo" }}
+            </span>
+          </td>
+          <td class="text-center">
+            <button
+              class="btn btn-sm btn-outline-info me-1"
+              (click)="visualizarProduto(produto.id!)"
+              title="Visualizar"
+            >
+              👁️
+            </button>
+            <button
+              class="btn btn-sm btn-outline-primary me-1"
+              (click)="abrirModalEditar(produto)"
+              title="Editar"
+            >
+              ✏️
+            </button>
+            <button
+              *ngIf="produto.ativo"
+              class="btn btn-sm btn-outline-warning me-1"
+              (click)="desativar(produto.id!)"
+              title="Desativar"
+            >
+              ⏸️
+            </button>
+            <button
+              *ngIf="!produto.ativo"
+              class="btn btn-sm btn-outline-success me-1"
+              (click)="ativar(produto.id!)"
+              title="Ativar"
+            >
+              ▶️
+            </button>
+            <button
+              class="btn btn-sm btn-outline-danger"
+              (click)="excluir(produto.id!)"
+              title="Excluir"
+            >
+              🗑️
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Paginação -->
+  <div
+    *ngIf="
+      !isLoading() &&
+      produtosPage() &&
+      produtosPage()!.totalPages > 1
+    "
+    class="d-flex justify-content-between align-items-center mt-3"
+  >
+    <div class="text-muted small">
+      Mostrando
+      {{ produtosPage()!.number * produtosPage()!.size + 1 }} a
+      {{
+        Math.min(
+          (produtosPage()!.number + 1) * produtosPage()!.size,
+          produtosPage()!.totalElements
+        )
+      }}
+      de {{ produtosPage()!.totalElements }} produtos
+    </div>
+    <nav>
+      <ul class="pagination pagination-sm mb-0">
+        <li
+          class="page-item"
+          [class.disabled]="produtosPage()!.number === 0"
+        >
+          <a
+            class="page-link"
+            href="#"
+            (click)="paginaAnterior(); $event.preventDefault()"
+          >
+            Anterior
+          </a>
+        </li>
+        <li
+          *ngFor="let page of getPaginas(); let i = index"
+          class="page-item"
+          [class.active]="i === produtosPage()!.number"
+        >
+          <a
+            class="page-link"
+            href="#"
+            (click)="irParaPagina(i); $event.preventDefault()"
+          >
+            {{ i + 1 }}
+          </a>
+        </li>
+        <li
+          class="page-item"
+          [class.disabled]="
+            produtosPage()!.number === produtosPage()!.totalPages - 1
+          "
+        >
+          <a
+            class="page-link"
+            href="#"
+            (click)="proximaPagina(); $event.preventDefault()"
+          >
+            Próxima
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</div>
+
+<!-- Modal de Visualização -->
+<div
+  class="modal fade"
+  [class.show]="showModalVisualizar()"
+  [style.display]="showModalVisualizar() ? 'block' : 'none'"
+  tabindex="-1"
+  role="dialog"
+>
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Detalhes do Produto</h5>
+        <button
+          type="button"
+          class="btn-close"
+          (click)="fecharModalVisualizar()"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body" *ngIf="produtoVisualizar(); let produto">
+        <div class="row">
+          <div class="col-md-4 text-center mb-3">
+            <img
+              [src]="getImagemPrincipal(produto)"
+              [alt]="produto.nome"
+              class="img-fluid rounded"
+              style="max-height: 300px; object-fit: cover;"
+              (error)="onImageError($event)"
+            />
+          </div>
+          <div class="col-md-8">
+            <h5 class="mb-3">{{ produto.nome }}</h5>
+            <div class="mb-2">
+              <strong>Descrição:</strong>
+              <p>{{ produto.descricao || 'Sem descrição' }}</p>
+            </div>
+            <div class="row mb-2">
+              <div class="col-6">
+                <strong>Segmento:</strong>
+                <p>{{ produto.segmentoNome || '-' }}</p>
+              </div>
+              <div class="col-6">
+                <strong>Fornecedor:</strong>
+                <p>{{ produto.fornecedorNome || '-' }}</p>
+              </div>
+            </div>
+            <div class="row mb-2">
+              <div class="col-4">
+                <strong>Custo Unitário:</strong>
+                <p>{{ formatarPreco(produto.custoUnitario || 0) }}</p>
+              </div>
+              <div class="col-4">
+                <strong>Preço de Venda:</strong>
+                <p class="fw-semibold text-primary">
+                  {{ formatarPreco(produto.precoVenda || 0) }}
+                </p>
+              </div>
+              <div class="col-4" *ngIf="produto.precoDe">
+                <strong>Preço De:</strong>
+                <p class="text-decoration-line-through text-muted">
+                  {{ formatarPreco(produto.precoDe) }}
+                </p>
+              </div>
+            </div>
+            <div class="row mb-2">
+              <div class="col-6">
+                <strong>Unidade de Medida:</strong>
+                <p>{{ produto.unidadeMedida }}</p>
+              </div>
+              <div class="col-6">
+                <strong>Status:</strong>
+                <p>
+                  <span
+                    class="badge"
+                    [class.bg-success]="produto.ativo"
+                    [class.bg-secondary]="!produto.ativo"
+                  >
+                    {{ produto.ativo ? "Ativo" : "Inativo" }}
+                  </span>
+                </p>
+              </div>
+            </div>
+            <div *ngIf="produto.imagens && produto.imagens.length > 0" class="mt-3">
+              <strong>Imagens:</strong>
+              <div class="row g-2 mt-2">
+                <div class="col-3" *ngFor="let img of produto.imagens">
+                  <img
+                    [src]="formatarUrlImagem(img?.url || '')"
+                    [alt]="(img?.descricao) || produto.nome"
+                    class="img-thumbnail"
+                    style="width: 100%; height: 100px; object-fit: cover;"
+                    (error)="onImageError($event)"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="fecharModalVisualizar()"
+        >
+          Fechar
+        </button>
+        <button
+          type="button"
+          class="btn btn-primary"
+          *ngIf="produtoVisualizar(); let produto"
+          (click)="abrirModalEditar(produto); fecharModalVisualizar()"
+        >
+          Editar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Edição/Criação -->
+<div
+  class="modal fade"
+  [class.show]="showModal()"
+  [style.display]="showModal() ? 'block' : 'none'"
+  tabindex="-1"
+  role="dialog"
+>
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header border-bottom bg-light">
+        <h5 class="modal-title fw-bold mb-0">
+          <i class="bi bi-box-seam me-2 text-primary"></i>
+          {{ editId() !== null ? "Editar" : "Novo" }} Produto
+        </h5>
+        <button
+          type="button"
+          class="btn-close"
+          (click)="fecharModal()"
+          aria-label="Close"
+        ></button>
+      </div>
+      <form [formGroup]="form" (ngSubmit)="salvar()">
+        <div class="modal-body" style="max-height: 75vh; overflow-y: auto; padding: 1.5rem;">
+          <div class="row g-4">
+            <!-- Nome -->
+            <div class="col-12">
+              <label class="form-label">Nome *</label>
+              <input
+                type="text"
+                class="form-control"
+                formControlName="nome"
+                [class.is-invalid]="
+                  form.get('nome')?.invalid && form.get('nome')?.touched
+                "
+              />
+              <div
+                class="invalid-feedback"
+                *ngIf="form.get('nome')?.invalid && form.get('nome')?.touched"
+              >
+                Nome é obrigatório
+              </div>
+            </div>
+
+            <!-- Descrição -->
+            <div class="col-12">
+              <label class="form-label">Descrição</label>
+              <textarea
+                class="form-control"
+                formControlName="descricao"
+                rows="3"
+              ></textarea>
+            </div>
+
+            <!-- Hierarquia: Categoria > Subcategoria > Segmento -->
+            <div class="col-md-4">
+              <label class="form-label">Categoria</label>
+              <select
+                class="form-select"
+                formControlName="categoriaId"
+                (change)="onCategoriaChange()"
+              >
+                <option [value]="null">Selecione uma categoria</option>
+                <option
+                  *ngFor="let categoria of categorias()"
+                  [value]="categoria.id"
+                >
+                  {{ categoria.nome }}
+                </option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Subcategoria</label>
+              <select
+                class="form-select"
+                formControlName="subcategoriaId"
+                (change)="onSubcategoriaChange()"
+                [disabled]="!form.get('categoriaId')?.value"
+              >
+                <option [value]="null">Selecione uma subcategoria</option>
+                <option
+                  *ngFor="let subcategoria of subcategorias()"
+                  [value]="subcategoria.id"
+                >
+                  {{ subcategoria.nome }}
+                </option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Segmento *</label>
+              <select
+                class="form-select"
+                formControlName="segmentoId"
+                [class.is-invalid]="
+                  form.get('segmentoId')?.invalid &&
+                  form.get('segmentoId')?.touched
+                "
+                [disabled]="!form.get('subcategoriaId')?.value && segmentosFiltrados().length > 0"
+              >
+                <option [value]="null">Selecione um segmento</option>
+                <option
+                  *ngFor="let segmento of (segmentosFiltrados().length > 0 ? segmentosFiltrados() : segmentos())"
+                  [value]="segmento.id"
+                >
+                  {{ segmento.categoriaNome ? segmento.categoriaNome + ' > ' : '' }}
+                  {{ segmento.subcategoriaNome ? segmento.subcategoriaNome + ' > ' : '' }}
+                  {{ segmento.nome }}
+                </option>
+              </select>
+              <div
+                class="invalid-feedback"
+                *ngIf="form.get('segmentoId')?.invalid && form.get('segmentoId')?.touched"
+              >
+                Segmento é obrigatório
+              </div>
+            </div>
+
+            <!-- Unidade de Medida -->
+            <div class="col-md-6">
+              <label class="form-label">Unidade de Medida *</label>
+              <select class="form-select" formControlName="unidadeMedida">
+                <option value="UNIDADE">Unidade</option>
+                <option value="PACOTE">Pacote</option>
+                <option value="CAIXA">Caixa</option>
+                <option value="METRO">Metro</option>
+                <option value="KILO">Quilo</option>
+              </select>
+            </div>
+
+            <!-- Fornecedor -->
+            <div class="col-md-6">
+              <label class="form-label">Fornecedor *</label>
+              <select
+                class="form-select"
+                formControlName="fornecedorId"
+                [class.is-invalid]="
+                  form.get('fornecedorId')?.invalid &&
+                  form.get('fornecedorId')?.touched
+                "
+              >
+                <option [value]="null">Selecione um fornecedor</option>
+                <option
+                  *ngFor="let fornecedor of fornecedores()"
+                  [value]="fornecedor.id"
+                >
+                  {{ fornecedor.nome }}
+                </option>
+              </select>
+              <div
+                class="invalid-feedback"
+                *ngIf="form.get('fornecedorId')?.invalid && form.get('fornecedorId')?.touched"
+              >
+                Fornecedor é obrigatório
+              </div>
+            </div>
+
+            <!-- Custo Unitário -->
+            <div class="col-md-4">
+              <label class="form-label">Custo Unitário *</label>
+              <input
+                type="number"
+                step="0.01"
+                min="0.01"
+                class="form-control"
+                formControlName="custoUnitario"
+                placeholder="0,00"
+                [class.is-invalid]="
+                  form.get('custoUnitario')?.invalid &&
+                  form.get('custoUnitario')?.touched
+                "
+              />
+              <div
+                class="invalid-feedback"
+                *ngIf="form.get('custoUnitario')?.invalid && form.get('custoUnitario')?.touched"
+              >
+                Custo unitário é obrigatório e deve ser maior que zero
+              </div>
+            </div>
+
+            <!-- Margem de Lucro -->
+            <div class="col-md-4">
+              <label class="form-label">Margem de Lucro</label>
+              <input
+                type="number"
+                step="0.01"
+                min="0"
+                class="form-control"
+                formControlName="margemLucro"
+                placeholder="0"
+              />
+              <small class="text-muted d-block mt-1">O preço de venda será calculado automaticamente</small>
+            </div>
+
+            <!-- Preço Venda (editável) -->
+            <div class="col-md-4">
+              <label class="form-label">Preço Venda *</label>
+              <input
+                type="number"
+                step="0.01"
+                min="0.01"
+                class="form-control"
+                formControlName="precoVenda"
+                placeholder="0,00"
+                (focus)="onPrecoVendaFocus()"
+                (blur)="onPrecoVendaBlur()"
+                [class.is-invalid]="
+                  form.get('precoVenda')?.invalid &&
+                  form.get('precoVenda')?.touched
+                "
+              />
+              <small class="text-muted d-block mt-1">Calculado automaticamente ou pode ser editado manualmente</small>
+              <div
+                class="invalid-feedback"
+                *ngIf="form.get('precoVenda')?.invalid && form.get('precoVenda')?.touched"
+              >
+                Preço de venda é obrigatório
+              </div>
+            </div>
+
+            <!-- Preço De (editável) -->
+            <div class="col-md-6">
+              <label class="form-label">Preço De</label>
+              <input
+                type="number"
+                step="0.01"
+                min="0"
+                class="form-control"
+                formControlName="precoDe"
+                placeholder="0,00"
+                (input)="onPrecoDeInput($event)"
+                (blur)="onPrecoDeBlur($event)"
+              />
+              <small class="text-muted d-block mt-1">Calculado automaticamente (15-20% sobre o preço de venda) ou pode ser editado</small>
+            </div>
+
+            <!-- Estoque -->
+            <div class="col-md-6">
+              <label class="form-label">Estoque</label>
+              <input
+                type="number"
+                step="1"
+                min="0"
+                class="form-control"
+                formControlName="estoqueAtual"
+              />
+            </div>
+
+            <!-- Visualização do Produto -->
+            <div class="col-12 mt-3">
+              <label class="form-label fw-semibold">Visualização do Produto em:</label>
+              <div class="row g-3 mt-2">
+                <div class="col-md-6">
+                  <div class="form-check p-3 border rounded">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      formControlName="destaque"
+                      id="destaque"
+                    />
+                    <label class="form-check-label ms-2" for="destaque">
+                      <strong>Produto em Destaque</strong>
+                      <small class="text-muted d-block">Exibido na seção de destaques</small>
+                    </label>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-check p-3 border rounded">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      formControlName="maisVendido"
+                      id="maisVendido"
+                    />
+                    <label class="form-check-label ms-2" for="maisVendido">
+                      <strong>Mais Vendido</strong>
+                      <small class="text-muted d-block">Exibido na seção de mais vendidos</small>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Upload de Imagens -->
+            <div class="col-12 mt-3">
+              <label class="form-label fw-semibold">Anexar Imagens</label>
+              <div class="border rounded p-3 bg-light">
+                <input
+                  type="file"
+                  class="form-control"
+                  accept="image/*"
+                  multiple
+                  (change)="onFileSelected($event)"
+                />
+                <small class="text-muted d-block mt-2">Selecione uma ou mais imagens para o produto</small>
+              </div>
+              
+              <!-- Preview das imagens -->
+              <div class="row g-3 mt-3" *ngIf="previewImagens().length > 0">
+                <div class="col-6 col-md-4 col-lg-3" *ngFor="let preview of previewImagens(); let i = index">
+                  <div class="position-relative border rounded p-2 bg-white shadow-sm">
+                    <img
+                      [src]="preview"
+                      alt="Preview"
+                      class="img-fluid rounded"
+                      style="width: 100%; height: 120px; object-fit: cover;"
+                    />
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-danger position-absolute top-0 end-0 rounded-circle"
+                      (click)="removerImagem(i)"
+                      style="transform: translate(50%, -50%); width: 28px; height: 28px; padding: 0; display: flex; align-items: center; justify-content: center;"
+                      title="Remover imagem"
+                    >
+                      <i class="bi bi-x-lg"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Atributos Dinâmicos -->
+            <div class="col-12">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <label class="form-label mb-0">Atributos do Produto</label>
+                <button
+                  type="button"
+                  class="btn btn-sm btn-outline-primary"
+                  (click)="adicionarAtributo()"
+                >
+                  + Adicionar Atributo
+                </button>
+              </div>
+              
+              <div
+                formArrayName="atributos"
+              >
+                <div
+                  *ngFor="let atributo of atributosFormArray.controls; let i = index"
+                  [formGroupName]="i"
+                  class="row g-2 mb-2"
+                >
+                  <div class="col-md-5">
+                    <input
+                      type="text"
+                      class="form-control form-control-sm"
+                      formControlName="nome"
+                      placeholder="Nome do atributo (ex: Tamanho, Cor)"
+                    />
+                  </div>
+                  <div class="col-md-5">
+                    <input
+                      type="text"
+                      class="form-control form-control-sm"
+                      formControlName="valor"
+                      placeholder="Valor (ex: P, Vermelho)"
+                    />
+                  </div>
+                  <div class="col-md-2">
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-outline-danger w-100"
+                      (click)="removerAtributo(i)"
+                    >
+                      Remover
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <small class="text-muted" *ngIf="atributosFormArray.length === 0">
+                Nenhum atributo adicionado. Exemplos: Tamanho, Cor, Material, etc.
+              </small>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer border-top bg-light">
+          <button
+            type="button"
+            class="btn btn-outline-secondary"
+            (click)="fecharModal()"
+          >
+            <i class="bi bi-x-lg me-1"></i> Cancelar
+          </button>
+          <button
+            type="submit"
+            class="btn btn-primary"
+            [disabled]="!form.valid"
+          >
+            <i class="bi bi-check-lg me-1"></i>
+            {{ editId() !== null ? "Atualizar" : "Criar" }} Produto
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Backdrop para modais -->
+<div
+  *ngIf="showModal() || showModalVisualizar()"
+  class="modal-backdrop fade show"
+  (click)="showModal() ? fecharModal() : fecharModalVisualizar()"
+></div>

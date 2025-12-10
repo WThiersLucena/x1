@@ -1,0 +1,107 @@
+.checkout {
+  h1 {
+    margin: 0 0 8px;
+  }
+
+  .card {
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+  }
+
+  .card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+    padding: 0.75rem 1rem;
+  }
+
+  .whatsapp-icon {
+    display: inline-flex;
+    align-items: center;
+    color: #25d366;
+    width: 20px;
+    height: 20px;
+  }
+
+  .form-check {
+    padding: 0.5rem;
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    transition: all 0.2s;
+
+    &:hover {
+      background-color: #f8f9fa;
+    }
+
+    .form-check-input:checked ~ .form-check-label {
+      font-weight: 600;
+    }
+  }
+
+  .btn-primary {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+
+    &:hover {
+      background-color: #0b5ed7;
+      border-color: #0a58ca;
+    }
+
+    &:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+    }
+  }
+
+  // Accordion com radio button no lugar da seta
+  .accordion {
+    .accordion-item {
+      border: 1px solid #dee2e6;
+      border-radius: 0.375rem;
+      margin-bottom: 0.5rem;
+      background-color: white;
+    }
+
+    .accordion-button {
+      background-color: white;
+      border: none;
+      padding: 0.75rem 1rem;
+
+      &::after {
+        display: none !important; // Remove a seta do accordion
+      }
+
+      &:not(.collapsed) {
+        background-color: #f8f9fa;
+        box-shadow: none;
+      }
+
+      .form-check-input {
+        margin-top: 0;
+        cursor: pointer;
+      }
+    }
+
+    .accordion-body {
+      background-color: #f8f9fa;
+      border-top: 1px solid #dee2e6;
+      padding: 1rem;
+    }
+  }
+
+  // Estilo para bandeira do cartão
+  .input-group-text {
+    img {
+      object-fit: contain;
+    }
+  }
+
+  // Estilo para QR Code
+  .qr-code-container {
+    img {
+      border: 2px solid #dee2e6;
+      border-radius: 0.375rem;
+      padding: 1rem;
+      background-color: white;
+    }
+  }
+}

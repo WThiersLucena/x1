@@ -1,0 +1,746 @@
+.c-carousel {
+  margin-top: 60px;
+  margin-bottom: 50px;
+  overflow: visible; /* Permitir que imagens expandidas sejam visíveis */
+  position: relative;
+  h2 {
+    text-align: center;
+  }
+}
+.carousel-inner {
+  margin-top: 30px;
+  overflow: visible; /* Permitir que imagens expandidas sejam visíveis */
+}
+
+/* Botões de navegação do carrossel - estilo igual ao hero carousel */
+.c-carousel .carousel-control-prev,
+.c-carousel .carousel-control-next {
+  width: 60px;
+  height: 60px;
+  background-color: rgba(0, 0, 0, 0.5);
+  border-radius: 50%;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 0.8;
+  transition: all 0.3s ease;
+
+  &:hover {
+    opacity: 1;
+    background-color: rgba(0, 0, 0, 0.7);
+  }
+
+  .carousel-control-prev-icon,
+  .carousel-control-next-icon {
+    width: 30px;
+    height: 30px;
+    filter: brightness(0) invert(1); /* Garante que o ícone seja branco */
+  }
+}
+
+.c-carousel .carousel-control-prev {
+  left: 20px;
+}
+
+.c-carousel .carousel-control-next {
+  right: 20px;
+}
+
+@media (max-width: 768px) {
+  .c-carousel .carousel-control-prev,
+  .c-carousel .carousel-control-next {
+    width: 50px;
+    height: 50px;
+
+    .carousel-control-prev-icon,
+    .carousel-control-next-icon {
+      width: 24px;
+      height: 24px;
+    }
+  }
+
+  .c-carousel .carousel-control-prev {
+    left: 10px;
+  }
+
+  .c-carousel .carousel-control-next {
+    right: 10px;
+  }
+}
+
+@media (max-width: 576px) {
+  .c-carousel .carousel-control-prev,
+  .c-carousel .carousel-control-next {
+    width: 40px;
+    height: 40px;
+
+    .carousel-control-prev-icon,
+    .carousel-control-next-icon {
+      width: 20px;
+      height: 20px;
+    }
+  }
+}
+
+.carousel-item {
+  overflow: visible; /* Permitir que imagens expandidas sejam visíveis */
+}
+
+.carousel-item .container {
+  overflow: visible; /* Permitir que imagens expandidas sejam visíveis */
+}
+
+.carousel-item .row {
+  overflow: visible; /* Permitir que imagens expandidas sejam visíveis */
+}
+
+.carousel-item [class*="col-"] {
+  overflow: visible; /* Permitir que imagens expandidas sejam visíveis */
+}
+/* Card outlet - BEM */
+.c-carousel .o-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+  transition: transform 0.2s ease-in-out;
+  overflow: hidden;
+  border-top: 2px solid #fde2e8; /* Linha rosa no topo */
+}
+
+.c-carousel .o-card:hover {
+  transform: translateY(-6px);
+}
+
+.c-carousel .o-card__like {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
+  display: flex;
+  gap: 6px;
+}
+
+.c-carousel .o-card__like-btn {
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  border: none;
+  background: rgba(255, 255, 255, 0.85);
+  color: #374151; /* neutral-700 */
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.c-carousel .o-card__like-btn:hover {
+  background: #ffffff;
+  transform: scale(1.05);
+}
+
+.c-carousel .o-card__like-btn.is-liked {
+  color: #dc2626; /* red-600 */
+}
+
+.c-carousel .o-card__icon-btn {
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  border: none;
+  background: rgba(255, 255, 255, 0.85);
+  color: #374151;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.c-carousel .o-card__icon-btn:hover:not([disabled]) {
+  background: #ffffff;
+  transform: scale(1.05);
+}
+
+.c-carousel .o-card__icon-btn[disabled],
+.c-carousel .o-card__icon-btn.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: rgba(255, 255, 255, 0.6);
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.6);
+    transform: none;
+  }
+
+  img {
+    filter: grayscale(100%);
+    opacity: 0.6;
+  }
+}
+
+.c-carousel .o-card__media {
+  background: #f3f4f6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 8px 0 8px;
+  min-height: 180px; /* Aumentar altura da área da imagem */
+}
+
+.c-carousel .o-card__img {
+  width: 100%;
+  height: 160px; /* Aumentar altura da imagem */
+  object-fit: contain;
+  transform-origin: bottom;
+  transform: translateY(6%);
+  transition: transform 0.25s ease-in-out;
+}
+
+.c-carousel .o-card:hover .o-card__img {
+  transform: translateY(6%) scale(1.08);
+}
+
+@media (min-width: 768px) {
+  .c-carousel .o-card__img {
+    height: 180px; /* Aumentar ainda mais em tablets */
+  }
+
+  .c-carousel .o-card__media {
+    min-height: 200px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .c-carousel .o-card__img {
+    height: 200px; /* Aumentar ainda mais em desktop */
+  }
+
+  .c-carousel .o-card__media {
+    min-height: 220px;
+  }
+}
+
+.c-carousel .o-card__body {
+  padding: 12px;
+}
+
+.c-carousel .o-card__title {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #111827; /* neutral-900 */
+  text-align: center;
+}
+
+.c-carousel .o-card__pricing {
+  margin-top: 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+
+.c-carousel .o-card__previous {
+  font-size: 0.85rem;
+  color: #dc2626; /* red-600 */
+  text-decoration: line-through;
+  font-weight: 700;
+}
+
+.c-carousel .o-card__label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.c-carousel .o-card__price {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: rgba(0, 0, 0, 0.85);
+}
+
+.c-carousel .o-card__sizes {
+  margin-top: 6px;
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+}
+
+.c-carousel .o-card__size-btn {
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+  color: #111827;
+  border-radius: 8px;
+  padding: 2px 8px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+}
+
+.c-carousel .o-card__size-btn:hover {
+  background: #111827;
+  color: #ffffff;
+}
+
+.c-carousel .o-card__size-btn.is-selected {
+  background: #111827;
+  color: #ffffff;
+  border-color: #111827;
+}
+
+/* Badge de desconto para card padrão */
+.c-carousel .o-card__badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 3;
+  background: linear-gradient(135deg, #f472b6 0%, #ec4899 100%);
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 20px;
+  box-shadow: 0 2px 4px rgba(244, 114, 182, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Ajuste para 5 cards por linha quando showDetailsButton=true (cards padrão) */
+@media (min-width: 768px) {
+  .c-carousel .row.row-default-5 .col-md-2-4 {
+    flex: 0 0 20% !important;
+    max-width: 20% !important;
+    width: 20% !important;
+  }
+}
+
+/* ============================================================================
+   MODELO 1: CARD OUTLET MODERNO - ESTILO MINIMALISTA COM BADGE DE DESCONTO
+   ============================================================================ */
+.c-carousel .o-card--modelo1 {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+  transition: transform 0.2s ease-in-out;
+  overflow: hidden;
+
+  .o-card__badge {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    z-index: 3;
+    background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+    color: #ffffff;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 20px;
+    box-shadow: 0 2px 4px rgba(220, 38, 38, 0.3);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .o-card__like {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 2;
+    display: flex;
+    gap: 6px;
+  }
+
+  .o-card__media {
+    background: #f3f4f6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 8px 0 8px;
+    position: relative;
+  }
+
+  .o-card__img {
+    width: 100%;
+    height: 126px;
+    object-fit: contain;
+    transform-origin: bottom;
+    transform: translateY(6%);
+    transition: transform 0.25s ease-in-out;
+  }
+
+  @media (min-width: 768px) {
+    .o-card__img {
+      height: 140px;
+    }
+  }
+
+  @media (min-width: 1200px) {
+    .o-card__img {
+      height: 154px;
+    }
+  }
+
+  .o-card__body {
+    padding: 12px;
+  }
+
+  &:hover {
+    transform: translateY(-6px);
+
+    .o-card__img {
+      transform: translateY(6%) scale(1.08);
+    }
+  }
+
+  .o-card__title {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: #111827;
+    text-align: center;
+  }
+
+  .o-card__pricing {
+    margin-top: 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+  }
+
+  .o-card__previous {
+    font-size: 0.85rem;
+    color: #dc2626;
+    text-decoration: line-through;
+    font-weight: 700;
+  }
+
+  .o-card__label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #374151;
+  }
+
+  .o-card__price {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: rgba(0, 0, 0, 0.85);
+  }
+
+  .o-card__sizes {
+    margin-top: 6px;
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  .o-card__size-btn {
+    border: 1px solid #d1d5db;
+    background: #ffffff;
+    color: #111827;
+    border-radius: 8px;
+    padding: 2px 8px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.15s ease-in-out;
+
+    &:hover {
+      background: #111827;
+      color: #ffffff;
+    }
+
+    &.is-selected {
+      background: #111827;
+      color: #ffffff;
+      border-color: #111827;
+    }
+  }
+
+  .btn {
+    margin-top: 6px;
+  }
+}
+
+/* ============================================================================
+   MODELO 2: CARD OUTLET MODERNO - ESTILO ELEGANTE COM GRADIENTE
+   ============================================================================ */
+/* Ajuste do container para 5 cards por linha no Modelo 2 */
+@media (min-width: 768px) {
+  /* Quando a row tem a classe row-modelo2, ajustar todos os filhos diretos */
+  .c-carousel .row.row-modelo2 > div[class*="col-"] {
+    flex: 0 0 20% !important;
+    max-width: 20% !important;
+    width: 20% !important;
+  }
+
+  /* Também aplicar quando a coluna tem a classe col-md-2-4 */
+  .c-carousel .row .col-md-2-4 {
+    flex: 0 0 20% !important;
+    max-width: 20% !important;
+    width: 20% !important;
+  }
+}
+
+.c-carousel .o-card--modelo2 {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
+  overflow: hidden; /* Manter overflow hidden para imagem não sair do card */
+  border: 2px solid transparent;
+  /* O card mantém sempre o mesmo tamanho */
+
+  &:hover {
+    transform: translateY(-6px) scale(1.02);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.1);
+    border-color: #f3f4f6;
+  }
+
+  .o-card__badge {
+    position: absolute;
+    top: 2px;
+    left: 8%px;
+    z-index: 3;
+    background: linear-gradient(
+      135deg,
+      #f472b6 0%,
+      #754e62 100%
+    ); /* Rosa/vermelho como na imagem */
+    color: #ffffff; /* Texto branco */
+    font-size: 0.6rem;
+    font-weight: 500;
+    padding: 6px 12px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(22, 1, 12, 0.3);
+    border: none; /* Removido border para ficar como na imagem */
+    text-transform: uppercase;
+    letter-spacing: 0.2px;
+    opacity: 1; /* Garantir que está visível */
+  }
+
+  .o-card__like {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 3;
+  }
+
+  .o-card__icon-btn {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(8px);
+    box-shadow: 0 2px 8px rgba(196, 8, 8, 0.1);
+    opacity: 0.7; /* Ícone mais sutil como na imagem */
+    transition: opacity 0.2s ease;
+
+    &:hover {
+      opacity: 1; /* Fica mais visível no hover */
+    }
+
+    img {
+      opacity: 0.6; /* Ícone com opacidade reduzida como na imagem */
+      filter: grayscale(0.3); /* Leve desaturação para ficar mais sutil */
+      transition: opacity 0.2s ease;
+    }
+
+    &:hover img {
+      opacity: 1;
+      filter: grayscale(0);
+    }
+  }
+
+  .o-card__media {
+    background: #f8fafc;
+    padding: 19px 13px 0 13px; /* Reduzido 20% (24px -> 19px, 16px -> 13px) */
+    position: relative;
+    overflow: hidden; /* Hidden por padrão, muda para visible no hover */
+    z-index: 2; /* Aumentado para ficar acima do body */
+    flex: 0 0 auto;
+    cursor: pointer; /* Indicar que é interativo */
+
+    &::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #fde2e8, #f1c2d0, #fde2e8);
+      z-index: 1;
+    }
+  }
+
+  .o-card__img {
+    height: 176px; /* Reduzido 20% (220px -> 176px) */
+    width: 100%;
+    object-fit: contain;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.05));
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+      object-fit 0.5s ease;
+    position: relative;
+    z-index: 2;
+    display: block;
+    transform-origin: center center;
+  }
+
+  .o-card__body {
+    padding: 14px 13px; /* Reduzido 20% (18px -> 14px, 16px -> 13px) */
+    display: flex;
+    flex-direction: column;
+    gap: 10px; /* Reduzido 20% (12px -> 10px) */
+    background: linear-gradient(180deg, #ffffff 0%, #fafafa 100%);
+    position: relative;
+    z-index: 1;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Hover na área da foto - imagem expande suavemente */
+  .o-card__media:hover {
+    .o-card__img {
+      transform: scale(1.15);
+      transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 5;
+    }
+
+    &::before {
+      display: none; /* Ocultar linha decorativa no hover */
+    }
+  }
+
+  /* Hover no card inteiro apenas para elevação */
+  &:hover {
+    transform: translateY(-6px) scale(1.02);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.1);
+    border-color: #f3f4f6;
+  }
+
+  .o-card__body {
+    padding: 14px 13px; /* Reduzido 20% (18px -> 14px, 16px -> 13px) */
+    display: flex;
+    flex-direction: column;
+    gap: 10px; /* Reduzido 20% (12px -> 10px) */
+    background: linear-gradient(180deg, #ffffff 0%, #fafafa 100%);
+    position: relative;
+    z-index: 1;
+    transition: margin-top 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .o-card__title {
+    font-weight: 700;
+    font-size: 0.85rem; /* Reduzido proporcionalmente */
+    color: #111827;
+    text-align: center;
+    line-height: 1.5;
+    min-height: 2.3em; /* Reduzido 20% (2.85em -> 2.3em) */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .o-card__pricing {
+    margin-top: 5px; /* Reduzido 20% (6px -> 5px) */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px; /* Reduzido 20% (6px -> 5px) */
+    padding: 10px; /* Reduzido 20% (12px -> 10px) */
+    background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+    border-radius: 10px; /* Reduzido proporcionalmente */
+    border: 1px solid #fecaca;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    z-index: 1;
+  }
+
+  .o-card__previous {
+    font-size: 0.75rem; /* Reduzido proporcionalmente */
+    color: #991b1b;
+    text-decoration: line-through;
+    font-weight: 600;
+    opacity: 0.8;
+  }
+
+  .o-card__label {
+    font-size: 0.7rem; /* Reduzido proporcionalmente */
+    font-weight: 600;
+    color: #7f1d1d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .o-card__price {
+    font-size: 1.15rem; /* Reduzido 20% (1.35rem -> 1.15rem) */
+    font-weight: 900;
+    color: #dc2626;
+    letter-spacing: -0.5px;
+    text-shadow: 0 1px 2px rgba(220, 38, 38, 0.1);
+  }
+
+  .o-card__sizes {
+    margin-top: 8px; /* Reduzido 20% (10px -> 8px) */
+    display: flex;
+    justify-content: center;
+    gap: 6px; /* Reduzido 20% (8px -> 6px) */
+    flex-wrap: wrap;
+  }
+
+  .o-card__size-btn {
+    min-width: 32px; /* Reduzido 20% (40px -> 32px) */
+    height: 29px; /* Reduzido 20% (36px -> 29px) */
+    border: 2px solid #e5e7eb;
+    background: #ffffff;
+    color: #6b7280;
+    border-radius: 8px; /* Reduzido proporcionalmente */
+    padding: 0 10px; /* Reduzido 20% (12px -> 10px) */
+    font-size: 0.75rem; /* Reduzido proporcionalmente */
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+
+    &:hover:not(.is-selected) {
+      border-color: #d1d5db;
+      background: #f9fafb;
+      color: #374151;
+      transform: translateY(-2px);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    &.is-selected {
+      background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+      color: #ffffff;
+      border-color: #dc2626;
+      box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+      transform: translateY(-2px);
+    }
+  }
+
+  .btn {
+    margin-top: 8px; /* Reduzido 20% (10px -> 8px) */
+    border-radius: 10px; /* Reduzido proporcionalmente */
+    font-weight: 700;
+    font-size: 0.8rem; /* Reduzido proporcionalmente */
+    padding: 0.6rem 1rem; /* Reduzido 20% (0.75rem -> 0.6rem, 1.25rem -> 1rem) */
+    background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+    border: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(31, 41, 55, 0.2);
+
+    &:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(31, 41, 55, 0.3);
+      background: linear-gradient(135deg, #111827 0%, #1f2937 100%);
+    }
+
+    &:active:not(:disabled) {
+      transform: translateY(0);
+    }
+  }
+}

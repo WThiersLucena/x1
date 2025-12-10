@@ -1,0 +1,194 @@
+<section class="auth-page">
+  <div class="container">
+    <div class="card">
+      <!-- ====================================================================== -->
+      <!-- PÁGINA DE LOGIN -->
+      <!-- ====================================================================== -->
+      <div *ngIf="!isRegisterPage()">
+        <h2>Entrar na sua conta</h2>
+
+        <form
+          [formGroup]="loginForm"
+          (ngSubmit)="submitLogin()"
+          class="form"
+          novalidate
+        >
+          <label>
+            <span>Email</span>
+            <input
+              type="email"
+              formControlName="email"
+              placeholder="voce@email.com"
+            />
+          </label>
+
+          <label>
+            <span>Senha</span>
+            <input
+              type="password"
+              formControlName="password"
+              placeholder="••••••"
+            />
+          </label>
+
+          <button type="submit" class="submit" [disabled]="isLoading()">
+            <ng-container *ngIf="!isLoading(); else spinnerLogin">
+              Entrar
+            </ng-container>
+            <ng-template #spinnerLogin>Carregando...</ng-template>
+          </button>
+
+          <p class="hint">
+            Novo aqui?
+            <a routerLink="/register" class="link-primary">Criar conta</a>
+          </p>
+        </form>
+      </div>
+
+      <!-- ====================================================================== -->
+      <!-- PÁGINA DE CADASTRO/REGISTRO -->
+      <!-- ====================================================================== -->
+      <div *ngIf="isRegisterPage()">
+        <h2>Criar nova conta</h2>
+
+        <form
+          [formGroup]="registerForm"
+          (ngSubmit)="submitRegister()"
+          class="form"
+          novalidate
+        >
+          <!-- Campo Nome -->
+          <label>
+            <span>Nome</span>
+            <input
+              type="text"
+              formControlName="name"
+              placeholder="Seu nome completo"
+            />
+            <small
+              *ngIf="
+                registerForm.get('name')?.touched &&
+                registerForm.get('name')?.hasError('required')
+              "
+              class="error-message"
+            >
+              Nome é obrigatório
+            </small>
+            <small
+              *ngIf="
+                registerForm.get('name')?.touched &&
+                registerForm.get('name')?.hasError('minlength')
+              "
+              class="error-message"
+            >
+              Nome deve ter no mínimo 2 caracteres
+            </small>
+          </label>
+
+          <!-- Campo Email -->
+          <label>
+            <span>Email</span>
+            <input
+              type="email"
+              formControlName="email"
+              placeholder="voce@email.com"
+            />
+            <small
+              *ngIf="
+                registerForm.get('email')?.touched &&
+                registerForm.get('email')?.hasError('required')
+              "
+              class="error-message"
+            >
+              Email é obrigatório
+            </small>
+            <small
+              *ngIf="
+                registerForm.get('email')?.touched &&
+                registerForm.get('email')?.hasError('email')
+              "
+              class="error-message"
+            >
+              Email inválido
+            </small>
+          </label>
+
+          <!-- Campo Senha -->
+          <label>
+            <span>Senha</span>
+            <input
+              type="password"
+              formControlName="password"
+              placeholder="Mínimo 6 caracteres"
+            />
+            <small
+              *ngIf="
+                registerForm.get('password')?.touched &&
+                registerForm.get('password')?.hasError('required')
+              "
+              class="error-message"
+            >
+              Senha é obrigatória
+            </small>
+            <small
+              *ngIf="
+                registerForm.get('password')?.touched &&
+                registerForm.get('password')?.hasError('minlength')
+              "
+              class="error-message"
+            >
+              Senha deve ter no mínimo 6 caracteres
+            </small>
+          </label>
+
+          <!-- Campo Confirmar Senha -->
+          <label>
+            <span>Confirmar senha</span>
+            <input
+              type="password"
+              formControlName="confirmPassword"
+              placeholder="Repita a senha"
+            />
+            <small
+              *ngIf="
+                registerForm.get('confirmPassword')?.touched &&
+                registerForm.get('confirmPassword')?.hasError('required')
+              "
+              class="error-message"
+            >
+              Confirmação de senha é obrigatória
+            </small>
+            <small
+              *ngIf="
+                registerForm.get('confirmPassword')?.touched &&
+                registerForm.value.password !==
+                  registerForm.value.confirmPassword
+              "
+              class="error-message"
+            >
+              As senhas não coincidem
+            </small>
+          </label>
+
+          <!-- Botão Enviar -->
+          <button
+            type="button"
+            class="submit enabled"
+            [disabled]="isLoading()"
+            (click)="submitRegister()"
+          >
+            <ng-container *ngIf="!isLoading(); else spinnerRegister">
+              Enviar
+            </ng-container>
+            <ng-template #spinnerRegister>Carregando...</ng-template>
+          </button>
+
+          <p class="hint">
+            Já tem conta?
+            <a routerLink="/login" class="link-primary">Faça login</a>
+          </p>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>

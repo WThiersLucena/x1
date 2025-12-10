@@ -1,0 +1,362 @@
+<div class="indicadores-clientes-component">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h5 class="mb-0 fw-bold">
+      <i class="bi bi-people me-2 text-info"></i>
+      Indicadores de Clientes
+    </h5>
+    <div class="btn-group btn-group-sm" role="group">
+      <button
+        type="button"
+        class="btn"
+        [class.btn-info]="periodo() === 'hoje'"
+        [class.btn-outline-info]="periodo() !== 'hoje'"
+        (click)="alterarPeriodo('hoje')"
+      >
+        Hoje
+      </button>
+      <button
+        type="button"
+        class="btn"
+        [class.btn-info]="periodo() === 'semana'"
+        [class.btn-outline-info]="periodo() !== 'semana'"
+        (click)="alterarPeriodo('semana')"
+      >
+        7 dias
+      </button>
+      <button
+        type="button"
+        class="btn"
+        [class.btn-info]="periodo() === 'mes'"
+        [class.btn-outline-info]="periodo() !== 'mes'"
+        (click)="alterarPeriodo('mes')"
+      >
+        30 dias
+      </button>
+      <button
+        type="button"
+        class="btn"
+        [class.btn-info]="periodo() === 'ano'"
+        [class.btn-outline-info]="periodo() !== 'ano'"
+        (click)="alterarPeriodo('ano')"
+      >
+        Ano
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="isLoading()" class="text-center py-5">
+    <div class="spinner-border text-info" role="status">
+      <span class="visually-hidden">Carregando...</span>
+    </div>
+    <p class="mt-3 text-muted">Carregando indicadores...</p>
+  </div>
+
+  <div *ngIf="!isLoading() && indicadores(); let dados">
+    <!-- Cards de Resumo -->
+    <div class="row g-3 mb-4">
+      <div class="col-md-3 col-sm-6">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <div>
+                <h6 class="text-muted mb-1 small">Total de Clientes</h6>
+                <h4 class="mb-0 fw-bold">{{ dados.totalClientes }}</h4>
+              </div>
+              <div class="badge bg-info bg-opacity-10 text-info">
+                <i class="bi bi-people-fill"></i>
+              </div>
+            </div>
+            <div class="text-muted small">
+              <span class="text-success">{{ dados.clientesAtivos }}</span> ativos | 
+              <span class="text-secondary">{{ dados.clientesInativos }}</span> inativos
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-3 col-sm-6">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <div>
+                <h6 class="text-muted mb-1 small">Novos Clientes</h6>
+                <h4 class="mb-0 fw-bold text-success">{{ dados.novosClientes }}</h4>
+              </div>
+              <div class="badge bg-success bg-opacity-10 text-success">
+                <i class="bi bi-person-plus-fill"></i>
+              </div>
+            </div>
+            <div class="text-muted small">
+              Taxa: {{ formatarPercentual(dados.taxaNovosClientes) }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-3 col-sm-6">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <div>
+                <h6 class="text-muted mb-1 small">Ticket Médio Cliente</h6>
+                <h4 class="mb-0 fw-bold">{{ formatarMoeda(dados.ticketMedioCliente) }}</h4>
+              </div>
+              <div class="badge bg-primary bg-opacity-10 text-primary">
+                <i class="bi bi-cash-stack"></i>
+              </div>
+            </div>
+            <div class="text-muted small">
+              Frequência: {{ dados.frequenciaCompraMedia.toFixed(1) }} compras
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-3 col-sm-6">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <div>
+                <h6 class="text-muted mb-1 small">LTV Médio</h6>
+                <h4 class="mb-0 fw-bold text-success">{{ formatarMoeda(dados.ltvMedio) }}</h4>
+              </div>
+              <div class="badge bg-success bg-opacity-10 text-success">
+                <i class="bi bi-graph-up"></i>
+              </div>
+            </div>
+            <div class="text-muted small">
+              Valor médio de vida
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Segunda Linha de Cards -->
+    <div class="row g-3 mb-4">
+      <div class="col-md-4">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <div>
+                <h6 class="text-muted mb-1 small">Taxa de Abandono</h6>
+                <h4 class="mb-0 fw-bold" [class.text-warning]="dados.taxaAbandonoCarrinho > 50">
+                  {{ formatarPercentual(dados.taxaAbandonoCarrinho) }}
+                </h4>
+              </div>
+              <div class="badge bg-warning bg-opacity-10 text-warning">
+                <i class="bi bi-cart-x"></i>
+              </div>
+            </div>
+            <div class="text-muted small">
+              Valor abandonado: {{ formatarMoeda(dados.valorCarrinhosAbandonados) }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <div>
+                <h6 class="text-muted mb-1 small">Tempo Médio no Carrinho</h6>
+                <h4 class="mb-0 fw-bold">{{ dados.tempoMedioCarrinho.toFixed(1) }}h</h4>
+              </div>
+              <div class="badge bg-info bg-opacity-10 text-info">
+                <i class="bi bi-clock"></i>
+              </div>
+            </div>
+            <div class="text-muted small">
+              Tempo entre criação e finalização
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <div>
+                <h6 class="text-muted mb-1 small">Clientes VIP</h6>
+                <h4 class="mb-0 fw-bold">{{ dados.clientesVIP.length }}</h4>
+              </div>
+              <div class="badge bg-warning bg-opacity-10 text-warning">
+                <i class="bi bi-star-fill"></i>
+              </div>
+            </div>
+            <div class="text-muted small">
+              Maiores compradores
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabelas -->
+    <div class="row g-4">
+      <!-- Top Clientes VIP -->
+      <div class="col-md-6">
+        <div class="card border-0 shadow-sm">
+          <div class="card-header bg-white border-bottom">
+            <h6 class="mb-0 fw-semibold">Top 10 Clientes VIP</h6>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table table-sm mb-0">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Cliente</th>
+                    <th class="text-end">Compras</th>
+                    <th class="text-end">Total Gasto</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let cliente of dados.clientesVIP; let i = index">
+                    <td>
+                      <span class="badge bg-warning">{{ i + 1 }}</span>
+                    </td>
+                    <td>
+                      <div>
+                        <strong>{{ cliente.nome }}</strong>
+                        <br>
+                        <small class="text-muted">{{ cliente.email }}</small>
+                      </div>
+                    </td>
+                    <td class="text-end">{{ cliente.totalCompras }}</td>
+                    <td class="text-end fw-bold text-success">
+                      {{ formatarMoeda(cliente.valorTotalGasto) }}
+                    </td>
+                  </tr>
+                  <tr *ngIf="dados.clientesVIP.length === 0">
+                    <td colspan="4" class="text-center text-muted py-3">
+                      Nenhum cliente VIP no período
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Vendas por Estado -->
+      <div class="col-md-6">
+        <div class="card border-0 shadow-sm">
+          <div class="card-header bg-white border-bottom">
+            <h6 class="mb-0 fw-semibold">Vendas por Estado</h6>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table table-sm mb-0">
+                <thead>
+                  <tr>
+                    <th>Estado</th>
+                    <th class="text-end">Quantidade</th>
+                    <th class="text-end">Receita</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let item of dados.vendasPorEstado">
+                    <td><strong>{{ item.estado }}</strong></td>
+                    <td class="text-end">{{ item.quantidade }}</td>
+                    <td class="text-end">{{ formatarMoeda(item.receita) }}</td>
+                  </tr>
+                  <tr *ngIf="dados.vendasPorEstado.length === 0">
+                    <td colspan="3" class="text-center text-muted py-3">
+                      Nenhuma venda por estado no período
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Top Cidades -->
+      <div class="col-md-6">
+        <div class="card border-0 shadow-sm">
+          <div class="card-header bg-white border-bottom">
+            <h6 class="mb-0 fw-semibold">Top 10 Cidades</h6>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table table-sm mb-0">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Cidade / Estado</th>
+                    <th class="text-end">Pedidos</th>
+                    <th class="text-end">Receita</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let item of dados.topCidades; let i = index">
+                    <td>
+                      <span class="badge bg-info">{{ i + 1 }}</span>
+                    </td>
+                    <td>
+                      <strong>{{ item.cidade }}</strong> / {{ item.estado }}
+                    </td>
+                    <td class="text-end">{{ item.quantidade }}</td>
+                    <td class="text-end">{{ formatarMoeda(item.receita) }}</td>
+                  </tr>
+                  <tr *ngIf="dados.topCidades.length === 0">
+                    <td colspan="4" class="text-center text-muted py-3">
+                      Nenhuma cidade com vendas no período
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Produtos Mais Abandonados -->
+      <div class="col-md-6">
+        <div class="card border-0 shadow-sm">
+          <div class="card-header bg-white border-bottom">
+            <h6 class="mb-0 fw-semibold">Produtos Mais Abandonados</h6>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table table-sm mb-0">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Produto</th>
+                    <th class="text-end">Qtd. Abandonada</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let item of dados.produtosMaisAbandonados; let i = index">
+                    <td>
+                      <span class="badge bg-warning">{{ i + 1 }}</span>
+                    </td>
+                    <td>{{ item.produtoNome }}</td>
+                    <td class="text-end">{{ item.quantidadeAbandonada }}</td>
+                  </tr>
+                  <tr *ngIf="dados.produtosMaisAbandonados.length === 0">
+                    <td colspan="3" class="text-center text-muted py-3">
+                      Nenhum produto abandonado no período
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="!isLoading() && !indicadores()" class="alert alert-warning">
+    <i class="bi bi-exclamation-triangle me-2"></i>
+    Não foi possível carregar os indicadores de clientes.
+  </div>
+</div>
+

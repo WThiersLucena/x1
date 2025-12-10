@@ -1,0 +1,380 @@
+<header class="site-header">
+  <!-- Primeira Navbar: Logo, Pesquisa e Ícones -->
+  <nav class="navbar navbar-expand-lg navbar-light bg-pink top-navbar">
+    <div class="container">
+      <!-- Logo à esquerda -->
+      <a
+        href="/home"
+        class="navbar-brand logo"
+        target="_self"
+        rel="noopener noreferrer"
+      >
+        <img
+          src="/assets/logo/Logo-Thiers.png"
+          alt="Casa Sanches - Desde 1991"
+        />
+      </a>
+
+      <!-- Campo de Pesquisa Centralizado -->
+      <div class="search-container">
+        <form
+          [formGroup]="searchForm"
+          (ngSubmit)="onSearchSubmit($event)"
+          class="search-form"
+        >
+          <div class="input-group">
+            <input
+              type="text"
+              class="form-control search-input"
+              formControlName="query"
+              placeholder="Pesquisar produtos..."
+              aria-label="Pesquisar produtos"
+            />
+            <button
+              class="btn btn-outline-secondary search-button"
+              type="submit"
+              aria-label="Buscar"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <circle cx="11" cy="11" r="8"></circle>
+                <path d="m21 21-4.35-4.35"></path>
+              </svg>
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Ícones à direita -->
+      <div class="navbar-actions">
+        <ul class="navbar-nav align-items-center gap-2">
+          <li class="nav-item">
+            <a
+              class="nav-link position-relative d-flex align-items-center gap-2"
+              href="#"
+              (click)="$event.preventDefault(); goToCart()"
+            >
+              <img [src]="cartIconUrl" alt="Cesta" width="24" height="24" />
+              <span class="d-none d-md-inline">Cesta</span>
+              <span
+                class="badge rounded-pill bg-dark ms-1"
+                *ngIf="cartCount > 0"
+                >{{ cartCount }}</span
+              >
+            </a>
+          </li>
+          <ng-container *ngIf="user(); else loginLink">
+            <li
+              class="nav-item account-menu-container"
+              (mouseenter)="abrirMenuConta()"
+              (mouseleave)="fecharMenuConta()"
+            >
+              <!-- Ícone de usuário com dropdown -->
+              <a
+                class="nav-link account-icon-link"
+                href="#"
+                (click)="$event.preventDefault()"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="user-icon"
+                >
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+                <span class="d-none d-md-inline ms-1">Minha Conta</span>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="12"
+                  height="12"
+                  viewBox="0 0 12 12"
+                  fill="currentColor"
+                  class="dropdown-arrow ms-1"
+                >
+                  <path d="M6 9L1 4h10L6 9z" />
+                </svg>
+              </a>
+
+              <!-- Menu Dropdown de Conta -->
+              <div
+                *ngIf="menuContaAberto"
+                class="account-menu"
+                (mouseenter)="abrirMenuConta()"
+                (mouseleave)="fecharMenuConta()"
+              >
+                <!-- Título do Menu -->
+                <div class="account-menu-header">
+                  <h6 class="account-menu-title">Minha Conta</h6>
+                </div>
+
+                <!-- Lista de Opções -->
+                <ul class="account-menu-list">
+                  <!-- Meus Pedidos -->
+                  <li class="account-menu-item">
+                    <a
+                      class="account-menu-link"
+                      href="#"
+                      (click)="
+                        $event.preventDefault(); navegarParaConta('pedidos')
+                      "
+                    >
+                      Meus Pedidos
+                    </a>
+                  </li>
+
+                  <!-- Meus Dados (com submenu) -->
+                  <li
+                    class="account-menu-item account-menu-item-with-submenu"
+                    (mouseenter)="$event.stopPropagation()"
+                  >
+                    <a
+                      class="account-menu-link"
+                      href="#"
+                      (click)="
+                        $event.preventDefault(); navegarParaConta('dados')
+                      "
+                    >
+                      Meus Dados
+                      <span class="submenu-arrow">›</span>
+                    </a>
+                    <ul class="account-submenu">
+                      <li class="account-submenu-item">
+                        <a
+                          class="account-submenu-link"
+                          href="#"
+                          (click)="
+                            $event.preventDefault();
+                            navegarParaConta('endereco')
+                          "
+                        >
+                          Endereço
+                        </a>
+                      </li>
+                      <li class="account-submenu-item">
+                        <a
+                          class="account-submenu-link"
+                          href="#"
+                          (click)="
+                            $event.preventDefault();
+                            navegarParaConta('telefone')
+                          "
+                        >
+                          Telefone
+                        </a>
+                      </li>
+                    </ul>
+                  </li>
+
+                  <!-- Carrinho -->
+                  <li class="account-menu-item">
+                    <a
+                      class="account-menu-link"
+                      href="#"
+                      (click)="$event.preventDefault(); goToCart()"
+                    >
+                      Carrinho
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </li>
+            <li class="nav-item">
+              <a
+                class="nav-link"
+                href="#"
+                (click)="$event.preventDefault(); logout()"
+                >Sair</a
+              >
+            </li>
+          </ng-container>
+          <ng-template #loginLink>
+            <li class="nav-item">
+              <a
+                class="nav-link"
+                href="#"
+                data-bs-toggle="offcanvas"
+                data-bs-target="#offcanvasLogin"
+                aria-controls="offcanvasLogin"
+                (click)="$event.preventDefault()"
+                >Login</a
+              >
+            </li>
+          </ng-template>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Segunda Navbar: Categorias -->
+  <nav class="navbar navbar-expand-lg navbar-light bg-pink categories-navbar">
+    <div class="container">
+      <button
+        class="navbar-toggler d-lg-none"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#categoriesNavbar"
+        aria-controls="categoriesNavbar"
+        aria-expanded="true"
+        aria-label="Toggle navigation"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div
+        class="navbar-collapse categories-menu show d-lg-flex"
+        id="categoriesNavbar"
+        style="display: flex !important"
+      >
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <!-- Menu dinâmico baseado nas categorias mockadas -->
+          <!-- Categorias -->
+          <ng-container
+            *ngFor="
+              let item of categoriasComSubcategorias();
+              let categoriaIndex = index
+            "
+          >
+            <li
+              class="nav-item dropdown"
+              (mouseenter)="abrirDropdown(categoriaIndex, item.categoria.id!)"
+              (mouseleave)="fecharDropdown()"
+            >
+              <a
+                class="nav-link dropdown-toggle"
+                href="#"
+                role="button"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+                (click)="
+                  $event.preventDefault();
+                  navegarParaCategoria(item.categoria.id!)
+                "
+              >
+                {{ item.categoria.nome }}
+              </a>
+              <!-- Dropdown de Subcategorias -->
+              <ul
+                *ngIf="item.subcategorias.length > 0"
+                class="dropdown-menu"
+                [class.show]="isDropdownAberto(item.categoria.id!)"
+                (mouseenter)="abrirDropdown(categoriaIndex, item.categoria.id!)"
+                (mouseleave)="fecharDropdown()"
+              >
+                <li
+                  *ngFor="let subcategoria of item.subcategorias"
+                  class="dropdown-item-container"
+                >
+                  <a
+                    class="dropdown-item"
+                    href="#"
+                    (click)="
+                      $event.preventDefault();
+                      navegarParaSubcategoria(subcategoria.id!)
+                    "
+                  >
+                    {{ subcategoria.nome }}
+                  </a>
+                </li>
+              </ul>
+              <!-- Mensagem quando não houver subcategorias -->
+              <ul
+                *ngIf="item.subcategorias.length === 0"
+                class="dropdown-menu"
+                [class.show]="isDropdownAberto(item.categoria.id!)"
+              >
+                <li>
+                  <span class="dropdown-item-text text-muted"
+                    >Nenhuma subcategoria disponível</span
+                  >
+                </li>
+              </ul>
+            </li>
+          </ng-container>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Offcanvas de Login -->
+  <div
+    class="offcanvas offcanvas-end"
+    tabindex="-1"
+    id="offcanvasLogin"
+    aria-labelledby="offcanvasLoginLabel"
+  >
+    <div class="offcanvas-header">
+      <h5 class="offcanvas-title" id="offcanvasLoginLabel">Entrar</h5>
+      <button
+        id="offcanvasLoginClose"
+        type="button"
+        class="btn-close"
+        data-bs-dismiss="offcanvas"
+        aria-label="Close"
+      ></button>
+    </div>
+    <div class="offcanvas-body">
+      <form
+        [formGroup]="loginForm"
+        (ngSubmit)="submitLoginFromOffcanvas()"
+        novalidate
+      >
+        <div class="mb-3">
+          <label class="form-label">Email</label>
+          <input
+            type="email"
+            class="form-control"
+            formControlName="email"
+            placeholder="voce@email.com"
+          />
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Senha</label>
+          <input
+            type="password"
+            class="form-control"
+            formControlName="password"
+            placeholder="•••••"
+          />
+        </div>
+        <button
+          type="submit"
+          class="btn btn-dark w-100"
+          [disabled]="isLoading()"
+        >
+          <ng-container *ngIf="!isLoading(); else loadingTpl"
+            >Entrar
+          </ng-container>
+        </button>
+        <ng-template #loadingTpl>Carregando...</ng-template>
+      </form>
+      <hr />
+      <div class="d-grid">
+        <p>Novo aqui?</p>
+        <a
+          class="btn btn-outline-secondary"
+          routerLink="/register"
+          data-bs-dismiss="offcanvas"
+          aria-label="Close"
+          >Criar conta</a
+        >
+      </div>
+    </div>
+  </div>
+</header>

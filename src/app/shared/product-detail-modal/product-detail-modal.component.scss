@@ -1,0 +1,137 @@
+.modal {
+  &.show {
+    display: block;
+    opacity: 1;
+  }
+}
+
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1040;
+  
+  &.show {
+    opacity: 0.5;
+  }
+}
+
+.modal.fade.show {
+  opacity: 1;
+}
+
+.product-images {
+  position: relative;
+
+  .main-image-container {
+    position: relative;
+
+    .image-navigation {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      padding: 0 10px;
+      pointer-events: none;
+
+      .image-nav-btn {
+        pointer-events: all;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: rgba(255, 255, 255, 0.9);
+        border: 1px solid #dee2e6;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        transition: all 0.2s;
+
+        &:hover {
+          background-color: white;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+          transform: scale(1.1);
+        }
+      }
+    }
+  }
+
+  .thumbnail-container {
+    .thumbnail {
+      opacity: 0.7;
+      transition: all 0.2s;
+
+      &:hover {
+        opacity: 1;
+        transform: scale(1.05);
+      }
+
+      &.active {
+        opacity: 1;
+        border-color: #0d6efd !important;
+        box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.25);
+      }
+    }
+  }
+}
+
+.product-info {
+  .pricing {
+    .text-decoration-line-through {
+      font-size: 0.9rem;
+    }
+  }
+
+  .description {
+    border-top: 1px solid #dee2e6;
+    padding-top: 1rem;
+  }
+
+  .attributes {
+    border-top: 1px solid #dee2e6;
+    padding-top: 1rem;
+  }
+
+  .additional-info {
+    border-top: 1px solid #dee2e6;
+    padding-top: 1rem;
+  }
+
+  .quantity-selector {
+    border-top: 1px solid #dee2e6;
+    padding-top: 1rem;
+
+    input[type="number"] {
+      -moz-appearance: textfield;
+      
+      &::-webkit-outer-spin-button,
+      &::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
+    }
+
+    .btn-outline-secondary {
+      &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .product-images {
+    .main-image-container {
+      img {
+        height: 300px !important;
+      }
+    }
+  }
+}
+

@@ -1,0 +1,120 @@
+<section class="page cart container py-4">
+  <h1 class="mb-3 d-flex align-items-center gap-2">
+    <img
+      src="/assets/icons/bolsa-de-compras-cheia.png"
+      width="28"
+      height="28"
+      alt="Cesta"
+    />
+    Cesta
+  </h1>
+
+  <div *ngIf="items.length === 0; else listTpl" class="alert alert-info">
+    Sua cesta está vazia.
+  </div>
+
+  <ng-template #listTpl>
+    <h2 class="h5 mb-3">Minha cesta de Itens</h2>
+    <div class="table-responsive">
+      <table class="table align-middle">
+        <thead>
+          <tr>
+            <th>Nome do item</th>
+            <th class="text-center">Detalhe</th>
+            <th class="text-center">Quantidade</th>
+            <th class="text-end">Valor do item</th>
+            <th class="text-end">Subtotal</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let it of items">
+            <td>
+              <div class="d-flex align-items-center gap-2">
+                <img
+                  [src]="it.imageUrl"
+                  [alt]="it.title"
+                  width="56"
+                  height="56"
+                  style="
+                    object-fit: contain;
+                    background: #f3f4f6;
+                    border-radius: 8px;
+                    cursor: pointer;
+                    transition: transform 0.2s;
+                  "
+                  (click)="abrirModalDetalhes(it, $event)"
+                  (error)="tratarErroImagem($event)"
+                  title="Clique para ver detalhes do produto"
+                />
+                <div class="fw-semibold">{{ it.title }}</div>
+              </div>
+            </td>
+            <td class="text-center">{{ it.size || "-" }}</td>
+            <td class="text-center">
+              <div class="btn-group" role="group">
+                <button
+                  class="btn btn-outline-secondary btn-sm btn-qty-minus"
+                  (click)="decrement(it)"
+                >
+                  -
+                </button>
+                <button
+                  class="btn btn-outline-secondary btn-sm fw-bold"
+                  disabled
+                >
+                  {{ it.quantity }}
+                </button>
+                <button
+                  class="btn btn-outline-secondary btn-sm btn-qty-plus"
+                  (click)="increment(it)"
+                >
+                  +
+                </button>
+              </div>
+            </td>
+            <td class="text-end">{{ it.price || "-" }}</td>
+            <td class="text-end">R$ {{ subtotal(it) | number : "1.2-2" }}</td>
+            <td class="text-end">
+              <button
+                class="btn btn-link p-0"
+                (click)="remove(it)"
+                aria-label="Remover"
+              >
+                <img
+                  src="/assets/icons/lixeira.png"
+                  width="20"
+                  height="20"
+                  alt="Remover"
+                />
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mt-3">
+      <button class="btn btn-outline-secondary" (click)="back()">Voltar</button>
+      <div class="d-flex align-items-center gap-4 m-0">
+        <div class="h6 m-0">Total de itens: {{ itemCount }}</div>
+        <div class="h5 m-0">
+          Total de valor: R$ {{ total | number : "1.2-2" }}
+        </div>
+      </div>
+      <div class="d-flex gap-2">
+        <button class="btn btn-outline-danger" (click)="clear()">
+          Esvaziar
+        </button>
+        <button class="btn btn-dark" (click)="checkout()">Finalizar</button>
+      </div>
+    </div>
+  </ng-template>
+
+  <!-- Modal de Detalhes do Produto -->
+  <app-product-detail-modal
+    [produto]="produtoSelecionado"
+    [show]="mostrarModal"
+    (close)="fecharModal()"
+  ></app-product-detail-modal>
+</section>

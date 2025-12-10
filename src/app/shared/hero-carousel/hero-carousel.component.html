@@ -1,0 +1,40 @@
+<div [id]="id" class="carousel slide" data-bs-ride="carousel" [attr.data-bs-interval]="interval">
+  <div class="carousel-indicators" *ngIf="slides.length > 1">
+    <button
+      *ngFor="let _s of slides; let i = index"
+      type="button"
+      [attr.data-bs-target]="'#' + id"
+      [attr.data-bs-slide-to]="i"
+      [class.active]="i === 0"
+      [attr.aria-current]="i === 0 ? 'true' : null"
+      [attr.aria-label]="'Slide ' + (i + 1)"
+    ></button>
+  </div>
+
+  <div class="carousel-inner">
+    <div class="carousel-item" *ngFor="let s of slides; let i = index" [class.active]="i === 0">
+      <img 
+        class="d-block w-100 hero-img" 
+        [src]="formatarUrlImagem(s.imageUrl)" 
+        [alt]="s.title"
+        (error)="onImageError($event)"
+        onerror="this.src='/assets/logo/Logo-Thiers.png'"
+      />
+      <div class="carousel-caption d-none d-md-block">
+        <h5>{{ s.title }}</h5>
+        <p *ngIf="s.description">{{ s.description }}</p>
+      </div>
+    </div>
+  </div>
+
+  <button class="carousel-control-prev" type="button" [attr.data-bs-target]="'#' + id" data-bs-slide="prev">
+    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+    <span class="visually-hidden">Anterior</span>
+  </button>
+  <button class="carousel-control-next" type="button" [attr.data-bs-target]="'#' + id" data-bs-slide="next">
+    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+    <span class="visually-hidden">Próximo</span>
+  </button>
+</div>
+
+

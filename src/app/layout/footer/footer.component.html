@@ -1,0 +1,30 @@
+<footer class="site-footer">
+  <div class="container">
+    <div class="cols">
+      <div class="col">
+        <h4>My Account</h4>
+        <ul>
+          <li><a routerLink="/contact">Contact Us</a></li>
+          <li><a routerLink="/faq">F.A.Q</a></li>
+          <li><a routerLink="/account">My Account</a></li>
+        </ul>
+      </div>
+      <div class="col">
+        <h4>Information</h4>
+        <ul>
+          <li><a routerLink="/about">About Us</a></li>
+          <li><a routerLink="/privacy">Privacy Policy</a></li>
+          <li><a routerLink="/terms">Terms & Conditions</a></li>
+        </ul>
+      </div>
+      <div class="col">
+        <h4>Subscribe</h4>
+        <form class="newsletter" (submit)="$event.preventDefault()">
+          <input type="email" placeholder="Email address" aria-label="Email" />
+          <button type="submit">Subscribe</button>
+        </form>
+      </div>
+    </div>
+    <div class="copy">Thiers© 2025. All rights reserved.</div>
+  </div>
+</footer>

@@ -1,0 +1,84 @@
+.admin-panel {
+  h3 {
+    color: #333;
+    font-weight: 600;
+  }
+
+  .accordion {
+    .accordion-button {
+      font-weight: 500;
+
+      &:not(.collapsed) {
+        background-color: #f8f9fa;
+        color: #0d6efd;
+      }
+    }
+  }
+
+  .table {
+    font-size: 0.9rem;
+
+    thead {
+      background-color: #f8f9fa;
+
+      th {
+        font-weight: 600;
+        border-bottom: 2px solid #dee2e6;
+      }
+    }
+  }
+}
+
+// Estilos para modais
+.modal {
+  &.show {
+    display: block !important;
+  }
+
+  .modal-header {
+    background-color: #f8f9fa;
+    border-bottom: 2px solid #dee2e6;
+
+    .modal-title {
+      font-weight: 600;
+      color: #333;
+    }
+  }
+
+  .modal-body {
+    padding: 1.5rem;
+  }
+
+  .form-label {
+    font-weight: 500;
+    color: #495057;
+    margin-bottom: 0.5rem;
+  }
+
+  .form-control,
+  .form-select {
+    border-radius: 0.375rem;
+
+    &:focus {
+      border-color: #0d6efd;
+      box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+    }
+  }
+}
+
+.modal-backdrop {
+  background-color: rgba(0, 0, 0, 0.5);
+
+  &.show {
+    opacity: 1;
+  }
+}
+
+// Ajustes responsivos
+@media (max-width: 768px) {
+  .admin-panel {
+    .table {
+      font-size: 0.8rem;
+    }
+  }
+}

@@ -1,0 +1,220 @@
+<div
+  class="modal fade"
+  [class.show]="show"
+  [style.display]="show ? 'block' : 'none'"
+  [style.z-index]="show ? '1055' : '-1'"
+  tabindex="-1"
+  role="dialog"
+  (click)="onBackdropClick($event)"
+  [attr.aria-hidden]="!show"
+  [attr.aria-modal]="show"
+>
+  <div class="modal-dialog modal-lg modal-dialog-centered" role="document" (click)="$event.stopPropagation()">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">{{ produto?.nome || 'Detalhes do Produto' }}</h5>
+        <button
+          type="button"
+          class="btn-close"
+          aria-label="Fechar"
+          (click)="fecharModal()"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <div class="row g-4">
+          <!-- Coluna de Imagens -->
+          <div class="col-md-6">
+            <div class="product-images">
+              <!-- Imagem Principal -->
+              <div class="main-image-container mb-3">
+                <img
+                  [src]="imagemAtual"
+                  [alt]="produto?.nome"
+                  class="img-fluid rounded"
+                  style="width: 100%; height: 400px; object-fit: cover; cursor: pointer;"
+                  (click)="proximaImagem()"
+                />
+                <!-- Navegação de Imagens (se houver mais de 1) -->
+                <div *ngIf="temMultiplasImagens" class="image-navigation">
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-light image-nav-btn image-nav-prev"
+                    (click)="imagemAnterior()"
+                    aria-label="Imagem anterior"
+                  >
+                    <i class="bi bi-chevron-left"></i>
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-light image-nav-btn image-nav-next"
+                    (click)="proximaImagem()"
+                    aria-label="Próxima imagem"
+                  >
+                    <i class="bi bi-chevron-right"></i>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Miniaturas (se houver mais de 1 imagem) -->
+              <div *ngIf="temMultiplasImagens" class="thumbnail-container">
+                <div class="d-flex gap-2 overflow-auto" style="max-width: 100%;">
+                  <img
+                    *ngFor="let img of imagens; let i = index"
+                    [src]="img"
+                    [alt]="'Imagem ' + (i + 1)"
+                    class="thumbnail"
+                    [class.active]="i === currentImageIndex"
+                    (click)="selecionarImagem(i)"
+                    style="
+                      width: 80px;
+                      height: 80px;
+                      object-fit: cover;
+                      border: 2px solid #dee2e6;
+                      border-radius: 6px;
+                      cursor: pointer;
+                      transition: all 0.2s;
+                    "
+                    [style.border-color]="i === currentImageIndex ? '#0d6efd' : '#dee2e6'"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Coluna de Informações -->
+          <div class="col-md-6">
+            <div class="product-info">
+              <!-- Nome -->
+              <h3 class="mb-3">{{ produto?.nome }}</h3>
+
+              <!-- Preços -->
+              <div class="pricing mb-3">
+                <div *ngIf="produto && produto.precoDe && produto.precoVenda && produto.precoDe > produto.precoVenda" class="text-decoration-line-through text-muted mb-1">
+                  De {{ formatarPreco(produto.precoDe) }}
+                </div>
+                <div class="h4 text-primary mb-0">
+                  Por {{ formatarPreco(produto?.precoVenda) }}
+                </div>
+              </div>
+
+              <!-- Descrição -->
+              <div class="description mb-4" *ngIf="produto && produto.descricao">
+                <h5 class="mb-2">Descrição</h5>
+                <p class="text-muted">{{ produto.descricao }}</p>
+              </div>
+
+              <!-- Atributos -->
+              <div class="attributes mb-4" *ngIf="produto && produto.atributos && produto.atributos.length > 0">
+                <h5 class="mb-3">Especificações</h5>
+                <div class="row g-2">
+                  <div class="col-12" *ngFor="let attr of produto.atributos">
+                    <div class="d-flex align-items-center p-2 bg-light rounded">
+                      <strong class="me-2">{{ attr.nome }}:</strong>
+                      <span>{{ attr.valor }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Informações Adicionais -->
+              <div class="additional-info mb-4">
+                <div class="row g-2 text-muted small">
+                  <div class="col-6" *ngIf="produto && produto.segmentoNome">
+                    <strong>Categoria:</strong> {{ produto.segmentoNome }}
+                  </div>
+                  <div class="col-6" *ngIf="produto && produto.fornecedorNome">
+                    <strong>Fornecedor:</strong> {{ produto.fornecedorNome }}
+                  </div>
+                  <div class="col-6" *ngIf="produto && produto.estoqueAtual !== undefined">
+                    <strong>Estoque:</strong> 
+                    <span [class.text-danger]="produto.estoqueAtual === 0" [class.text-success]="produto.estoqueAtual > 0">
+                      {{ produto.estoqueAtual }} unidades
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Seleção de Quantidade -->
+              <div class="quantity-selector mb-4" *ngIf="produto && produto.estoqueAtual !== undefined && produto.estoqueAtual > 0">
+                <label class="form-label fw-semibold">Quantidade:</label>
+                <div class="d-flex align-items-center gap-3">
+                  <button
+                    type="button"
+                    class="btn btn-outline-secondary"
+                    (click)="decrementarQuantidade()"
+                    [disabled]="quantidade <= 1"
+                    style="width: 40px; height: 40px;"
+                  >
+                    −
+                  </button>
+                  <input
+                    type="number"
+                    class="form-control text-center"
+                    [(ngModel)]="quantidade"
+                    [min]="1"
+                    [max]="produto.estoqueAtual"
+                    style="width: 80px;"
+                    (change)="validarQuantidade()"
+                    (blur)="validarQuantidade()"
+                  />
+                  <button
+                    type="button"
+                    class="btn btn-outline-secondary"
+                    (click)="incrementarQuantidade()"
+                    [disabled]="quantidade >= (produto.estoqueAtual || 0)"
+                    style="width: 40px; height: 40px;"
+                  >
+                    +
+                  </button>
+                  <span class="text-muted small">
+                    (Máx: {{ produto.estoqueAtual }})
+                  </span>
+                </div>
+              </div>
+
+              <!-- Mensagem de Estoque Esgotado -->
+              <div class="alert alert-warning" *ngIf="produto && produto.estoqueAtual === 0">
+                <i class="bi bi-exclamation-triangle me-2"></i>
+                Produto esgotado
+              </div>
+
+              <!-- Mensagem de Sucesso -->
+              <div class="alert alert-success alert-dismissible fade show" *ngIf="mensagemSucesso()" role="alert">
+                {{ mensagemSucesso() }}
+                <button type="button" class="btn-close" (click)="mensagemSucesso.set(null)" aria-label="Close"></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="fecharModal()">
+          Fechar
+        </button>
+        <button
+          type="button"
+          class="btn btn-primary"
+          (click)="adicionarAoCarrinho()"
+          [disabled]="isAdicionando() || !produto || !quantidadeValida || (produto.estoqueAtual || 0) === 0"
+        >
+          <span *ngIf="!isAdicionando()">
+            <i class="bi bi-cart-plus me-2"></i>
+            Adicionar à Cesta
+          </span>
+          <span *ngIf="isAdicionando()">
+            <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+            Adicionando...
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<div
+  class="modal-backdrop fade"
+  [class.show]="show"
+  [style.display]="show ? 'block' : 'none'"
+  [style.z-index]="show ? '1050' : '-1'"
+  (click)="fecharModal()"
+></div>
+

@@ -1,0 +1,423 @@
+<div class="fornecedores-component">
+  <!-- Cabeçalho -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h6 class="m-0">Gerenciar Fornecedores</h6>
+    <button
+      class="btn btn-outline-primary btn-sm"
+      (click)="abrirModalNovo()"
+    >
+      <i class="bi bi-plus-lg"></i> Novo Fornecedor
+    </button>
+  </div>
+
+  <!-- Barra de busca e filtros -->
+  <div class="row mb-3">
+    <div class="col-md-6">
+      <div class="input-group">
+        <input
+          type="text"
+          class="form-control"
+          placeholder="Buscar por nome..."
+          [value]="busca()"
+          (input)="busca.set($any($event.target).value)"
+          (keyup.enter)="onBuscar()"
+        />
+        <button
+          class="btn btn-outline-secondary"
+          type="button"
+          (click)="onBuscar()"
+          title="Buscar"
+        >
+          <i class="bi bi-search"></i>
+        </button>
+        <button
+          class="btn btn-outline-secondary"
+          type="button"
+          (click)="limparBusca()"
+          title="Limpar busca"
+          *ngIf="busca()"
+        >
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="btn-group" role="group">
+        <button
+          type="button"
+          class="btn btn-sm"
+          [class.btn-primary]="filtroAtivos() === null"
+          [class.btn-outline-primary]="filtroAtivos() !== null"
+          (click)="filtrarPorStatus(null)"
+        >
+          Todos
+        </button>
+        <button
+          type="button"
+          class="btn btn-sm"
+          [class.btn-success]="filtroAtivos() === true"
+          [class.btn-outline-success]="filtroAtivos() !== true"
+          (click)="filtrarPorStatus(true)"
+        >
+          Ativos
+        </button>
+        <button
+          type="button"
+          class="btn btn-sm"
+          [class.btn-secondary]="filtroAtivos() === false"
+          [class.btn-outline-secondary]="filtroAtivos() !== false"
+          (click)="filtrarPorStatus(false)"
+        >
+          Inativos
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="isLoading()" class="text-center text-muted py-3">
+    <div class="spinner-border spinner-border-sm" role="status">
+      <span class="visually-hidden">Carregando...</span>
+    </div>
+    <p class="mt-2 mb-0">Carregando fornecedores...</p>
+  </div>
+
+  <!-- Lista vazia -->
+  <div
+    *ngIf="!isLoading() && fornecedores().length === 0"
+    class="alert alert-info"
+  >
+    ℹ️ Nenhum fornecedor encontrado.
+  </div>
+
+  <!-- Tabela -->
+  <div
+    class="table-responsive"
+    *ngIf="!isLoading() && fornecedores().length > 0"
+  >
+    <table class="table table-striped align-middle">
+      <thead>
+        <tr>
+          <th>Nome</th>
+          <th>CNPJ</th>
+          <th>Telefone</th>
+          <th>E-mail</th>
+          <th>Status</th>
+          <th width="180" class="text-center">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let fornecedor of fornecedores()">
+          <td>
+            <div class="fw-semibold">{{ fornecedor.nome }}</div>
+          </td>
+          <td>{{ fornecedor.cnpj || "-" }}</td>
+          <td>{{ fornecedor.telefone }}</td>
+          <td>{{ fornecedor.email }}</td>
+          <td>
+            <span
+              class="badge"
+              [class.bg-success]="fornecedor.ativo"
+              [class.bg-secondary]="!fornecedor.ativo"
+            >
+              {{ fornecedor.ativo ? "Ativo" : "Inativo" }}
+            </span>
+          </td>
+          <td class="text-center">
+            <button
+              class="btn btn-sm btn-outline-primary me-1"
+              (click)="abrirModalEditar(fornecedor)"
+              title="Editar"
+            >
+              ✏️
+            </button>
+            <button
+              *ngIf="fornecedor.ativo"
+              class="btn btn-sm btn-outline-warning me-1"
+              (click)="desativar(fornecedor.id!)"
+              title="Desativar"
+            >
+              ⏸️
+            </button>
+            <button
+              *ngIf="!fornecedor.ativo"
+              class="btn btn-sm btn-outline-success me-1"
+              (click)="ativar(fornecedor.id!)"
+              title="Ativar"
+            >
+              ▶️
+            </button>
+            <button
+              class="btn btn-sm btn-outline-danger"
+              (click)="excluir(fornecedor.id!)"
+              title="Excluir"
+            >
+              🗑️
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Paginação -->
+  <div
+    *ngIf="
+      !isLoading() &&
+      fornecedoresPage() &&
+      fornecedoresPage()!.totalPages > 1
+    "
+    class="d-flex justify-content-between align-items-center mt-3"
+  >
+    <div class="text-muted small">
+      Mostrando
+      {{ fornecedoresPage()!.number * fornecedoresPage()!.size + 1 }} a
+      {{
+        Math.min(
+          (fornecedoresPage()!.number + 1) * fornecedoresPage()!.size,
+          fornecedoresPage()!.totalElements
+        )
+      }}
+      de {{ fornecedoresPage()!.totalElements }} fornecedores
+    </div>
+    <nav>
+      <ul class="pagination pagination-sm mb-0">
+        <li
+          class="page-item"
+          [class.disabled]="fornecedoresPage()!.number === 0"
+        >
+          <a
+            class="page-link"
+            href="#"
+            (click)="paginaAnterior(); $event.preventDefault()"
+          >
+            Anterior
+          </a>
+        </li>
+        <li
+          *ngFor="let page of getPaginas(); let i = index"
+          class="page-item"
+          [class.active]="i === fornecedoresPage()!.number"
+        >
+          <a
+            class="page-link"
+            href="#"
+            (click)="irParaPagina(i); $event.preventDefault()"
+          >
+            {{ i + 1 }}
+          </a>
+        </li>
+        <li
+          class="page-item"
+          [class.disabled]="
+            fornecedoresPage()!.number === fornecedoresPage()!.totalPages - 1
+          "
+        >
+          <a
+            class="page-link"
+            href="#"
+            (click)="proximaPagina(); $event.preventDefault()"
+          >
+            Próxima
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</div>
+
+<!-- Modal -->
+<div
+  class="modal fade"
+  [class.show]="showModal()"
+  [style.display]="showModal() ? 'block' : 'none'"
+  tabindex="-1"
+  role="dialog"
+>
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          {{ editId() !== null ? "Editar" : "Novo" }} Fornecedor
+        </h5>
+        <button
+          type="button"
+          class="btn-close"
+          (click)="fecharModal()"
+          aria-label="Close"
+        ></button>
+      </div>
+      <form [formGroup]="form" (ngSubmit)="salvar()">
+        <div class="modal-body">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label">Nome *</label>
+              <input
+                type="text"
+                class="form-control"
+                formControlName="nome"
+                [class.is-invalid]="
+                  form.get('nome')?.invalid && form.get('nome')?.touched
+                "
+              />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">CNPJ *</label>
+              <input
+                type="text"
+                class="form-control"
+                formControlName="cnpj"
+                [class.is-invalid]="
+                  form.get('cnpj')?.invalid && form.get('cnpj')?.touched
+                "
+              />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">E-mail *</label>
+              <input
+                type="email"
+                class="form-control"
+                formControlName="email"
+                [class.is-invalid]="
+                  form.get('email')?.invalid && form.get('email')?.touched
+                "
+              />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Telefone *</label>
+              <input
+                type="text"
+                class="form-control"
+                formControlName="telefone"
+                [class.is-invalid]="
+                  form.get('telefone')?.invalid && form.get('telefone')?.touched
+                "
+              />
+            </div>
+            <div class="col-12">
+              <label class="form-label">Observações</label>
+              <textarea
+                class="form-control"
+                formControlName="observacoes"
+                rows="3"
+              ></textarea>
+            </div>
+            <div class="col-12">
+              <hr />
+              <h6 class="mb-3">Endereço</h6>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">CEP *</label>
+              <input
+                type="text"
+                class="form-control"
+                formControlName="cep"
+                placeholder="00000-000"
+                [class.is-invalid]="
+                  form.get('cep')?.invalid && form.get('cep')?.touched
+                "
+              />
+            </div>
+            <div class="col-md-8">
+              <label class="form-label">Logradouro *</label>
+              <input
+                type="text"
+                class="form-control"
+                formControlName="logradouro"
+                [class.is-invalid]="
+                  form.get('logradouro')?.invalid &&
+                  form.get('logradouro')?.touched
+                "
+              />
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">Número *</label>
+              <input
+                type="text"
+                class="form-control"
+                formControlName="numero"
+                [class.is-invalid]="
+                  form.get('numero')?.invalid && form.get('numero')?.touched
+                "
+              />
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Complemento</label>
+              <input
+                type="text"
+                class="form-control"
+                formControlName="complemento"
+              />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Bairro *</label>
+              <input
+                type="text"
+                class="form-control"
+                formControlName="bairro"
+                [class.is-invalid]="
+                  form.get('bairro')?.invalid && form.get('bairro')?.touched
+                "
+              />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Cidade *</label>
+              <input
+                type="text"
+                class="form-control"
+                formControlName="cidade"
+                [class.is-invalid]="
+                  form.get('cidade')?.invalid && form.get('cidade')?.touched
+                "
+              />
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Estado *</label>
+              <input
+                type="text"
+                class="form-control"
+                formControlName="estado"
+                maxlength="2"
+                placeholder="SP"
+                [class.is-invalid]="
+                  form.get('estado')?.invalid && form.get('estado')?.touched
+                "
+              />
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Tipo *</label>
+              <select class="form-select" formControlName="tipoEndereco">
+                <option value="MATRIZ">Matriz</option>
+                <option value="FILIAL">Filial</option>
+                <option value="DEPOSITO">Depósito</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            (click)="fecharModal()"
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            class="btn btn-primary"
+            [disabled]="!form.valid"
+          >
+            Salvar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<div
+  *ngIf="showModal()"
+  class="modal-backdrop fade show"
+  (click)="fecharModal()"
+></div>
+
+

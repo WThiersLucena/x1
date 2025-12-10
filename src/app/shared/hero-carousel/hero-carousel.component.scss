@@ -1,0 +1,123 @@
+// Container do carrossel - cobre toda a largura da tela sem causar overflow
+:host {
+  display: block;
+  width: 100%;
+  position: relative;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.carousel {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.hero-img {
+  width: 100%;
+  /* Mantém proporção 1920x550 (aproximadamente 3.49:1) */
+  aspect-ratio: 1920 / 550;
+  object-fit: cover; /* cobre toda a área, cortando se necessário */
+  background: transparent;
+  display: block;
+}
+
+// Setas do carrossel com destaque
+.carousel-control-prev,
+.carousel-control-next {
+  width: 60px;
+  height: 60px;
+  background-color: rgba(0, 0, 0, 0.5);
+  border-radius: 50%;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 0.8;
+  transition: all 0.3s ease;
+
+  &:hover {
+    opacity: 1;
+    background-color: rgba(0, 0, 0, 0.7);
+  }
+
+  .carousel-control-prev-icon,
+  .carousel-control-next-icon {
+    width: 30px;
+    height: 30px;
+    filter: brightness(0) invert(1); // Garante que o ícone seja branco
+  }
+}
+
+.carousel-control-prev {
+  left: 20px;
+}
+
+.carousel-control-next {
+  right: 20px;
+}
+
+// Indicadores (bolinhas) na parte inferior
+.carousel-indicators {
+  bottom: 20px;
+
+  button {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.5);
+    border: 2px solid rgba(255, 255, 255, 0.8);
+    margin: 0 4px;
+
+    &.active {
+      background-color: rgba(255, 255, 255, 1);
+      border-color: rgba(255, 255, 255, 1);
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-img {
+    /* Mantém proporção mesmo em mobile */
+    aspect-ratio: 1920 / 550;
+  }
+
+  .carousel-control-prev,
+  .carousel-control-next {
+    width: 50px;
+    height: 50px;
+
+    .carousel-control-prev-icon,
+    .carousel-control-next-icon {
+      width: 24px;
+      height: 24px;
+    }
+  }
+
+  .carousel-control-prev {
+    left: 10px;
+  }
+
+  .carousel-control-next {
+    right: 10px;
+  }
+}
+
+@media (max-width: 576px) {
+  .hero-img {
+    /* Mantém proporção mesmo em mobile pequeno */
+    aspect-ratio: 1920 / 550;
+  }
+
+  .carousel-control-prev,
+  .carousel-control-next {
+    width: 40px;
+    height: 40px;
+
+    .carousel-control-prev-icon,
+    .carousel-control-next-icon {
+      width: 20px;
+      height: 20px;
+    }
+  }
+}
