@@ -1,9 +1,7 @@
 {
   "version": 2,
-  "buildCommand": "npm ci && npm run build:prod",
+  "buildCommand": "npm run build:prod",
   "outputDirectory": "dist/casasanches-front/browser",
-  "installCommand": "npm ci",
-  "framework": null,
   "rewrites": [
     {
       "source": "/(.*)",
