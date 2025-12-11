@@ -34,7 +34,7 @@
           },
           "configurations": {
             "production": {
-              "baseHref": "/e-commerce-Thiers/",
+              "baseHref": "/",
               "budgets": [
                 {
                   "type": "initial",
