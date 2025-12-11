@@ -8,9 +8,19 @@
   padding-left: 0;
   padding-right: 0;
   overflow-x: hidden; // Previne scroll horizontal
+  width: 100%;
+  max-width: 100%;
   
   .mt-30 {
     margin-top: 30px;
+
+    @media (max-width: 768px) {
+      margin-top: 20px;
+    }
+
+    @media (max-width: 576px) {
+      margin-top: 15px;
+    }
   }
 
   // Carrossel cobre toda a largura
@@ -18,6 +28,13 @@
     display: block;
     margin: 0;
     padding: 0;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  // Garantir que todos os carrosséis estejam centralizados
+  app-carousel {
+    display: block;
     width: 100%;
     max-width: 100%;
   }

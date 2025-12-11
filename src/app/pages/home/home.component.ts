@@ -45,19 +45,19 @@ export class HomePageComponent implements OnInit {
         description: 'Novidades quentinhas para você',
       },
       {
-        imageUrl: '/assets/destaque/Blusa_Masc.png',
-        title: 'Blusa Masculina',
+        imageUrl: '/assets/novidades/Destaque-2.jpg',
+        title: 'Propaganda Aleatoria',
         description: 'Estilo e conforto',
       },
       {
-        imageUrl: '/assets/destaque/Blusa_fen.png',
-        title: 'Blusa Feminina',
-        description: 'Elegância e sofisticação',
+        imageUrl: '/assets/novidades/Destaque-3.jpg',
+        title: 'Conjutos infantis',
+        description: 'Toda a Linha com Descontos Exclusivos',
       },
       {
-        imageUrl: '/assets/destaque/Bolsa_Gucci.png',
-        title: 'Bolsa Gucci',
-        description: 'Luxo e qualidade',
+        imageUrl: '/assets/novidades/z2.jpg',
+        title: 'Versao Demo',
+        description: 'By Thiers®',
       },
     ];
 
@@ -97,7 +97,7 @@ export class HomePageComponent implements OnInit {
         ativo: true,
         imagens: [
           {
-            url: '/assets/destaque/Blusa_Masc.png',
+            url: '/assets/destaque/Camisa Polo.jpg',
             principal: true,
             ativa: true,
           },
@@ -155,7 +155,7 @@ export class HomePageComponent implements OnInit {
         ativo: true,
         imagens: [
           {
-            url: '/assets/destaque/Bolsa_Gucci.png',
+            url: '/assets/destaque/Bolsa-Life-Couro-Verd.webp',
             principal: true,
             ativa: true,
           },
@@ -184,7 +184,7 @@ export class HomePageComponent implements OnInit {
         ativo: true,
         imagens: [
           {
-            url: '/assets/destaque/Inverno.png',
+            url: '/assets/destaque/pjama.webp',
             principal: true,
             ativa: true,
           },
@@ -212,7 +212,7 @@ export class HomePageComponent implements OnInit {
         ativo: true,
         imagens: [
           {
-            url: '/assets/destaque/Blusa_Masc.png',
+            url: '/assets/destaque/Camiseta.webp',
             principal: true,
             ativa: true,
           },

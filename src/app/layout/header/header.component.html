@@ -1,5 +1,5 @@
 <header class="site-header">
-  <!-- Primeira Navbar: Logo, Pesquisa e Ícones -->
+  <!-- Primeira Navbar: Logo, Pesquisa e Ações (Cesta e Conta) -->
   <nav class="navbar navbar-expand-lg navbar-light bg-pink top-navbar">
     <div class="container">
       <!-- Logo à esquerda -->
@@ -54,19 +54,19 @@
         </form>
       </div>
 
-      <!-- Ícones à direita -->
+      <!-- Ícones de Ação à direita (Cesta e Conta) -->
       <div class="navbar-actions">
         <ul class="navbar-nav align-items-center gap-2">
           <li class="nav-item">
             <a
-              class="nav-link position-relative d-flex align-items-center gap-2"
+              class="nav-link position-relative d-flex align-items-center justify-content-center action-icon"
               href="#"
               (click)="$event.preventDefault(); goToCart()"
+              title="Cesta de compras"
             >
               <img [src]="cartIconUrl" alt="Cesta" width="24" height="24" />
-              <span class="d-none d-md-inline">Cesta</span>
               <span
-                class="badge rounded-pill bg-dark ms-1"
+                class="badge rounded-pill bg-dark cart-badge"
                 *ngIf="cartCount > 0"
                 >{{ cartCount }}</span
               >
@@ -80,9 +80,10 @@
             >
               <!-- Ícone de usuário com dropdown -->
               <a
-                class="nav-link account-icon-link"
+                class="nav-link account-icon-link action-icon"
                 href="#"
                 (click)="$event.preventDefault()"
+                title="Minha Conta"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -99,14 +100,13 @@
                   <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                   <circle cx="12" cy="7" r="4"></circle>
                 </svg>
-                <span class="d-none d-md-inline ms-1">Minha Conta</span>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="12"
                   height="12"
                   viewBox="0 0 12 12"
                   fill="currentColor"
-                  class="dropdown-arrow ms-1"
+                  class="dropdown-arrow d-none d-md-inline ms-1"
                 >
                   <path d="M6 9L1 4h10L6 9z" />
                 </svg>
@@ -195,7 +195,7 @@
                 </ul>
               </div>
             </li>
-            <li class="nav-item">
+            <li class="nav-item d-none d-md-block">
               <a
                 class="nav-link"
                 href="#"
@@ -207,14 +207,30 @@
           <ng-template #loginLink>
             <li class="nav-item">
               <a
-                class="nav-link"
+                class="nav-link action-icon d-flex align-items-center justify-content-center"
                 href="#"
                 data-bs-toggle="offcanvas"
                 data-bs-target="#offcanvasLogin"
                 aria-controls="offcanvasLogin"
                 (click)="$event.preventDefault()"
-                >Login</a
+                title="Login"
               >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+                  <polyline points="10 17 15 12 10 7"></polyline>
+                  <line x1="15" y1="12" x2="3" y2="12"></line>
+                </svg>
+              </a>
             </li>
           </ng-template>
         </ul>
