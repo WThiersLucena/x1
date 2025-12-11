@@ -4,10 +4,13 @@
   z-index: 50;
   background: #ffffff;
   border-bottom: 1px solid #ececec;
+  overflow: visible; // Permite que menus dropdown sejam visíveis
 
   // Primeira Navbar: Logo, Pesquisa e Ações (Cesta e Conta)
   .top-navbar {
     border-bottom: 1px solid #e0e0e0;
+    position: relative;
+    overflow: visible; // Permite que menus dropdown sejam visíveis
 
     .container {
       max-width: 1200px;
@@ -19,6 +22,8 @@
       min-height: 70px;
       gap: 12px;
       flex-wrap: nowrap; // Garante que não quebra a linha
+      position: relative;
+      overflow: visible; // Permite que menus dropdown sejam visíveis
     }
 
     // Campo de Pesquisa Centralizado
@@ -551,6 +556,7 @@
   // Estilos para Menu de Conta do Usuário
   .account-menu-container {
     position: relative;
+    z-index: 1001; // Garante que o container esteja acima de outros elementos
 
     .account-icon-link {
       display: flex;
@@ -579,12 +585,22 @@
         width: 24px;
         height: 24px;
         stroke: currentColor;
+        fill: none;
+        display: block;
+        flex-shrink: 0;
+        visibility: visible;
+        opacity: 1;
       }
 
       .dropdown-arrow {
         width: 12px;
         height: 12px;
         color: currentColor;
+        fill: currentColor;
+        display: block;
+        flex-shrink: 0;
+        visibility: visible;
+        opacity: 1;
       }
 
       @media (max-width: 991.98px) {
@@ -617,8 +633,8 @@
       border: 1px solid #e0e0e0;
       border-radius: 8px;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-      z-index: 1000;
-      overflow: hidden;
+      z-index: 1002; // Garante que o menu esteja acima de tudo
+      overflow: visible; // Permite que submenus sejam visíveis
 
       .account-menu-header {
         padding: 1rem 1.5rem;
@@ -704,7 +720,7 @@
             margin-left: 4px;
             list-style: none;
             padding: 0.5rem 0;
-            z-index: 1001;
+            z-index: 1003; // Garante que o submenu esteja acima do menu principal
 
             .account-submenu-item {
               .account-submenu-link {
