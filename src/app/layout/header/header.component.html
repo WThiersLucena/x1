@@ -1,5 +1,5 @@
 <header class="site-header">
-  <!-- Primeira Navbar: Logo, Pesquisa e Ações (Cesta e Conta) -->
+  <!-- Primeira Navbar: Logo, Pesquisa e Ícones (Cesta, Conta, Login) -->
   <nav class="navbar navbar-expand-lg navbar-light bg-pink top-navbar">
     <div class="container">
       <!-- Logo à esquerda -->
@@ -54,9 +54,10 @@
         </form>
       </div>
 
-      <!-- Ícones de Ação à direita (Cesta e Conta) -->
+      <!-- Ícones à direita: Cesta, Minha Conta e Login -->
       <div class="navbar-actions">
         <ul class="navbar-nav align-items-center gap-2">
+          <!-- 1º Ícone: Cesta de Produtos -->
           <li class="nav-item">
             <a
               class="nav-link position-relative d-flex align-items-center justify-content-center action-icon"
@@ -72,13 +73,14 @@
               >
             </a>
           </li>
-          <ng-container *ngIf="user(); else loginLink">
+
+          <!-- 2º Ícone: Minha Conta (quando logado) -->
+          <ng-container *ngIf="user()">
             <li
               class="nav-item account-menu-container"
               (mouseenter)="abrirMenuConta()"
               (mouseleave)="fecharMenuConta()"
             >
-              <!-- Ícone de usuário com dropdown -->
               <a
                 class="nav-link account-icon-link action-icon"
                 href="#"
@@ -99,16 +101,6 @@
                 >
                   <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                   <circle cx="12" cy="7" r="4"></circle>
-                </svg>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="12"
-                  height="12"
-                  viewBox="0 0 12 12"
-                  fill="currentColor"
-                  class="dropdown-arrow d-none d-md-inline ms-1"
-                >
-                  <path d="M6 9L1 4h10L6 9z" />
                 </svg>
               </a>
 
@@ -195,16 +187,37 @@
                 </ul>
               </div>
             </li>
-            <li class="nav-item d-none d-md-block">
+
+            <!-- 4º Ícone: Logout (quando logado) -->
+            <li class="nav-item">
               <a
-                class="nav-link"
+                class="nav-link action-icon d-flex align-items-center justify-content-center"
                 href="#"
                 (click)="$event.preventDefault(); logout()"
-                >Sair</a
+                title="Sair"
               >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="user-icon"
+                >
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                  <polyline points="16 17 21 12 16 7"></polyline>
+                  <line x1="21" y1="12" x2="9" y2="12"></line>
+                </svg>
+              </a>
             </li>
           </ng-container>
-          <ng-template #loginLink>
+
+          <!-- 3º Ícone: Login (quando não logado) -->
+          <ng-container *ngIf="!user()">
             <li class="nav-item">
               <a
                 class="nav-link action-icon d-flex align-items-center justify-content-center"
@@ -225,6 +238,7 @@
                   stroke-width="2"
                   stroke-linecap="round"
                   stroke-linejoin="round"
+                  class="user-icon"
                 >
                   <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
                   <polyline points="10 17 15 12 10 7"></polyline>
@@ -232,7 +246,7 @@
                 </svg>
               </a>
             </li>
-          </ng-template>
+          </ng-container>
         </ul>
       </div>
     </div>
