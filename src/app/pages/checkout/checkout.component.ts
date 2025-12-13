@@ -20,8 +20,8 @@ import { PedidoService } from '../../core/services/pedido.service';
 import { EnderecoService } from '../../core/services/endereco.service';
 import { CartService } from '../../core/cart/cart.service';
 import { Carrinho, ItemCarrinho } from '../../core/models/carrinho.model';
-import { Endereco } from '../../core/models/endereco.model';
-import { FormaPagamento } from '../../core/models/pedido.model';
+import { Endereco, TipoEndereco } from '../../core/models/endereco.model';
+import { FormaPagamento, Pedido } from '../../core/models/pedido.model';
 
 @Component({
   selector: 'app-checkout-page',
@@ -121,29 +121,73 @@ export class CheckoutPageComponent implements OnInit {
     this.error.set(null);
 
     try {
-      // Carrega carrinho
-      const carrinho = await firstValueFrom(
-        this.carrinhoService.obterCarrinho()
-      );
+      // Tenta carregar carrinho do backend primeiro
+      let carrinhoBackend: Carrinho | null = null;
+      try {
+        carrinhoBackend = await firstValueFrom(
+          this.carrinhoService.obterCarrinho()
+        );
+        this.carrinho.set(carrinhoBackend);
+      } catch (error: any) {
+        // Se backend não estiver disponível, usa CartService (que tem fallback)
+        const isConnectionError =
+          error?.status === 0 ||
+          error?.status === undefined ||
+          error?.message?.includes('ERR_CONNECTION_REFUSED') ||
+          error?.message?.includes('Unknown Error');
 
-      // Define o carrinho mesmo se estiver vazio
-      // O backend vai validar quando tentar criar o pedido
-      this.carrinho.set(carrinho);
+        if (isConnectionError) {
+          console.warn(
+            '⚠️ Backend não disponível, usando dados do CartService'
+          );
+          carrinhoBackend = this.criarCarrinhoMockadoDoCartService();
+          this.carrinho.set(carrinhoBackend);
+        } else {
+          throw error; // Propaga outros erros
+        }
+      }
 
-      // Se o carrinho estiver vazio, apenas mostra um aviso, mas não bloqueia
-      if (!carrinho.itens || carrinho.itens.length === 0) {
+      // Garante que sempre há um carrinho (mesmo que vazio)
+      if (!carrinhoBackend) {
+        carrinhoBackend = {
+          itens: [],
+          subtotal: 0,
+          quantidadeTotal: 0,
+        };
+        this.carrinho.set(carrinhoBackend);
+      }
+
+      // Se o carrinho estiver vazio, apenas mostra um aviso (não bloqueia o carregamento)
+      if (!carrinhoBackend.itens || carrinhoBackend.itens.length === 0) {
         console.warn('⚠️ Carrinho vazio ao carregar checkout');
-        // Não define erro aqui, deixa o backend validar
+        // Não define erro aqui para não bloquear a visualização da página
+        // A validação será feita no método finalizarPedido()
       }
 
       // Carrega endereços
-      const enderecos = await firstValueFrom(this.enderecoService.listar());
-      this.enderecos.set(enderecos);
+      try {
+        const enderecos = await firstValueFrom(this.enderecoService.listar());
+        this.enderecos.set(enderecos);
 
-      if (enderecos.length === 0) {
-        this.error.set(
-          'Você precisa cadastrar um endereço antes de finalizar o pedido.'
-        );
+        if (enderecos.length === 0) {
+          this.error.set(
+            'Você precisa cadastrar um endereço antes de finalizar o pedido.'
+          );
+        }
+      } catch (error: any) {
+        // Se backend não estiver disponível, usa endereços mockados
+        const isConnectionError =
+          error?.status === 0 ||
+          error?.status === undefined ||
+          error?.message?.includes('ERR_CONNECTION_REFUSED');
+
+        if (isConnectionError) {
+          console.warn('⚠️ Backend não disponível, usando endereços mockados');
+          this.enderecos.set(this.criarEnderecosMockados());
+        } else {
+          console.error('Erro ao carregar endereços:', error);
+          this.error.set('Erro ao carregar endereços. Tente novamente.');
+        }
       }
     } catch (error: any) {
       console.error('Erro ao carregar dados:', error);
@@ -153,6 +197,138 @@ export class CheckoutPageComponent implements OnInit {
     } finally {
       this.isLoading.set(false);
     }
+  }
+
+  /**
+   * Cria carrinho mockado a partir dos itens do CartService
+   */
+  private criarCarrinhoMockadoDoCartService(): Carrinho {
+    const cartItems = this.cart.getItems();
+
+    if (cartItems.length === 0) {
+      return {
+        itens: [],
+        subtotal: 0,
+        quantidadeTotal: 0,
+      };
+    }
+
+    // Converte CartItem[] para ItemCarrinho[]
+    const itens: ItemCarrinho[] = cartItems.map((item, index) => {
+      // Extrai preço numérico do formato "R$ X,XX" ou "R$ X.XXX,XX"
+      let precoNumero = 0;
+      if (item.price) {
+        // Remove tudo exceto números, vírgulas e pontos
+        const precoLimpo = item.price.replace(/[^\d,.]/g, '');
+        // Se tem vírgula, assume formato brasileiro (R$ 1.234,56)
+        if (precoLimpo.includes(',')) {
+          // Remove pontos (milhares) e substitui vírgula por ponto
+          precoNumero = parseFloat(
+            precoLimpo.replace(/\./g, '').replace(',', '.')
+          );
+        } else {
+          // Formato americano ou número simples
+          precoNumero = parseFloat(precoLimpo) || 0;
+        }
+      }
+
+      // Se não conseguiu extrair preço, usa um valor padrão baseado no título
+      if (precoNumero === 0 || isNaN(precoNumero)) {
+        precoNumero = 99.9; // Valor padrão para desenvolvimento
+      }
+
+      return {
+        id: index + 1,
+        produtoId: Number(item.id),
+        produtoNome: item.title,
+        produtoImagemUrl: item.imageUrl,
+        produtoPrimeiroAtributo: item.size,
+        quantidade: item.quantity,
+        precoUnitario: precoNumero,
+        subtotal: precoNumero * item.quantity,
+      };
+    });
+
+    const subtotal = itens.reduce((sum, item) => sum + item.subtotal, 0);
+    const quantidadeTotal = itens.reduce(
+      (sum, item) => sum + item.quantidade,
+      0
+    );
+
+    return {
+      itens,
+      subtotal,
+      quantidadeTotal,
+    };
+  }
+
+  /**
+   * Cria endereços mockados quando o backend não está disponível
+   */
+  private criarEnderecosMockados(): Endereco[] {
+    const user = this.auth.user();
+    if (!user) return [];
+
+    // Retorna um endereço mockado padrão
+    return [
+      {
+        id: 1,
+        usuarioId: 1,
+        logradouro: 'Rua Exemplo',
+        numero: '123',
+        complemento: 'Apto 45',
+        bairro: 'Centro',
+        cidade: 'São Paulo',
+        estado: 'SP',
+        cep: '01000-000',
+        tipo: TipoEndereco.ENTREGA,
+      },
+    ];
+  }
+
+  /**
+   * Cria pedido mockado quando o backend não está disponível
+   */
+  private criarPedidoMockado(formValue: any): Pedido {
+    const carrinho = this.carrinho();
+    const endereco = this.enderecos().find(
+      (e) => e.id === Number(formValue.enderecoId)
+    );
+    const user = this.auth.user();
+
+    // Converte ItemCarrinho[] para ItemPedido[]
+    const itensPedido = (carrinho?.itens || []).map((item) => ({
+      produtoId: item.produtoId,
+      produtoNome: item.produtoNome,
+      produtoImagemUrl: item.produtoImagemUrl,
+      quantidade: item.quantidade,
+      precoUnitario: item.precoUnitario,
+      subtotal: item.subtotal,
+    }));
+
+    return {
+      id: Date.now(), // ID baseado em timestamp
+      numeroPedido: `PED-${Date.now()}`,
+      usuarioId: user ? 1 : undefined,
+      usuarioNome: user?.name,
+      enderecoId: Number(formValue.enderecoId),
+      enderecoCompleto: endereco
+        ? this.formatarEndereco(endereco)
+        : 'Endereço não informado',
+      status: 'PENDENTE' as const,
+      statusDescricao: 'Pedido pendente de confirmação',
+      formaPagamento: formValue.formaPagamento,
+      formaPagamentoDescricao:
+        this.formasPagamento.find((f) => f.value === formValue.formaPagamento)
+          ?.label || formValue.formaPagamento,
+      subtotal: carrinho?.subtotal || 0,
+      valorFrete: 0,
+      valorDesconto: 0,
+      valorTotal: carrinho?.subtotal || 0,
+      observacoes: formValue.observacoes || undefined,
+      dataPedido: new Date().toISOString(),
+      itens: itensPedido,
+    };
   }
 
   /**
@@ -197,6 +373,15 @@ export class CheckoutPageComponent implements OnInit {
       return;
     }
 
+    // Valida se há itens no carrinho
+    const carrinho = this.carrinho();
+    if (!carrinho || !carrinho.itens || carrinho.itens.length === 0) {
+      this.error.set(
+        'Seu carrinho está vazio. Adicione produtos antes de finalizar o pedido.'
+      );
+      return;
+    }
+
     // Valida se há endereço
     if (this.enderecos().length === 0) {
       this.error.set(
@@ -204,11 +389,6 @@ export class CheckoutPageComponent implements OnInit {
       );
       return;
     }
-
-    // Nota: Não validamos o carrinho aqui porque:
-    // 1. O backend já valida se o carrinho está vazio
-    // 2. O carrinho pode ter sido atualizado desde o carregamento inicial
-    // 3. A validação redundante pode causar falsos positivos
 
     const formaPagamento = this.checkoutForm.get('formaPagamento')?.value;
 
@@ -218,72 +398,21 @@ export class CheckoutPageComponent implements OnInit {
       return;
     }
 
-    // Valida formulário de cartão se necessário
-    if (formaPagamento === 'CARTAO_CREDITO' && !this.cartaoForm.valid) {
-      this.cartaoForm.markAllAsTouched();
-      this.error.set('Preencha todos os dados do cartão de crédito.');
-      return;
-    }
-
-    // Valida PIX
-    if (formaPagamento === 'PIX' && !this.mostrarQrCodePix()) {
-      this.error.set('Gere o QR Code do PIX antes de finalizar o pedido.');
-      return;
-    }
-
-    // Valida opções desativadas
-    if (formaPagamento === 'CARTAO_DEBITO' || formaPagamento === 'BOLETO') {
-      this.error.set('Esta forma de pagamento está desativada no momento.');
-      return;
-    }
-
     this.isFinalizando.set(true);
     this.error.set(null);
 
     try {
-      const formValue = this.checkoutForm.value;
-
-      console.log('🛒 Finalizando pedido com dados:', {
-        enderecoId: formValue.enderecoId,
-        formaPagamento: formValue.formaPagamento,
-        observacoes: formValue.observacoes,
-      });
-
-      const pedido = await firstValueFrom(
-        this.pedidoService.criarPedido({
-          enderecoId: Number(formValue.enderecoId),
-          formaPagamento: formValue.formaPagamento,
-          observacoes: formValue.observacoes || undefined,
-        })
-      );
-
-      console.log('✅ Pedido criado com sucesso:', pedido);
-
-      // Limpa o carrinho após criar o pedido
+      // Limpa o carrinho antes de redirecionar
       try {
         await this.cart.clear();
-        console.log('✅ Carrinho limpo após criar pedido');
+        console.log('✅ Carrinho limpo antes de redirecionar para WhatsApp');
       } catch (error) {
         console.error('⚠️ Erro ao limpar carrinho:', error);
         // Não bloqueia o fluxo se houver erro ao limpar carrinho
       }
 
-      // Se for WhatsApp, redireciona para página de confirmação
-      if (formaPagamento === 'WHATSAPP') {
-        this.router.navigate(['/order-confirmation'], {
-          queryParams: {
-            pedidoId: pedido.id,
-          },
-        });
-      } else {
-        // Para outras formas de pagamento, redireciona para página de conta
-        this.router.navigate(['/account'], {
-          queryParams: {
-            section: 'orders',
-            pedidoId: pedido.id,
-          },
-        });
-      }
+      // Redireciona para WhatsApp com mensagem pré-formatada
+      this.redirecionarParaWhatsApp();
     } catch (error: any) {
       console.error('❌ Erro ao finalizar pedido:', error);
       console.error('❌ Status:', error?.status);
@@ -341,6 +470,33 @@ export class CheckoutPageComponent implements OnInit {
     } finally {
       this.isFinalizando.set(false);
     }
+  }
+
+  /**
+   * Redireciona para WhatsApp com mensagem pré-formatada
+   */
+  private redirecionarParaWhatsApp(): void {
+    const numeroWhatsApp = '5511982539200';
+    const mensagem =
+      'Olá estou navegando em sua Versão Demo, finalizando um pedido.';
+
+    // Formata a mensagem para URL (encodeURIComponent)
+    const mensagemEncoded = encodeURIComponent(mensagem);
+
+    // Cria URL do WhatsApp Web/App
+    const urlWhatsApp = `https://wa.me/${numeroWhatsApp}?text=${mensagemEncoded}`;
+
+    // Abre em nova aba
+    window.open(urlWhatsApp, '_blank');
+
+    // Redireciona para página de confirmação após um pequeno delay
+    setTimeout(() => {
+      this.router.navigate(['/order-confirmation'], {
+        queryParams: {
+          pedidoId: Date.now(), // ID mockado baseado em timestamp
+        },
+      });
+    }, 500);
   }
 
   /**

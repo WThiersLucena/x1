@@ -1,7 +1,7 @@
 .site-footer {
-  background: #111827;
-  color: #d1d5db;
-  padding: 40px 0 16px;
+  background: #5d4037; // Marrom escuro similar à imagem
+  color: #ffffff;
+  padding: 48px 0 24px;
 
   .container {
     max-width: 1200px;
@@ -9,55 +9,386 @@
     padding: 0 16px;
   }
 
-  .cols {
+  .footer-content {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 24px;
-    margin-bottom: 24px;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 32px;
+    margin-bottom: 32px;
+
+    @media (max-width: 1200px) {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    @media (max-width: 768px) {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+    }
+
+    @media (max-width: 576px) {
+      grid-template-columns: 1fr;
+    }
   }
 
-  h4 {
+  .footer-col {
+    h4 {
+      color: #ffffff;
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin: 0 0 16px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+
+      li {
+        margin-bottom: 8px;
+
+        a {
+          color: #ffffff;
+          text-decoration: none;
+          font-size: 0.9rem;
+          transition: color 0.2s ease;
+
+          &:hover {
+            color: #ffd54f;
+            text-decoration: underline;
+          }
+        }
+      }
+    }
+  }
+
+  // Estilos para CONTATOS
+  .horario {
+    font-size: 0.85rem;
     color: #ffffff;
-    margin: 0 0 12px;
+    margin-bottom: 16px;
+    line-height: 1.5;
   }
 
-  ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-  }
-
-  a {
-    color: #d1d5db;
-    text-decoration: none;
-  }
-
-  .newsletter {
+  .contato-item {
     display: flex;
+    align-items: center;
     gap: 8px;
+    margin-bottom: 12px;
+    font-size: 0.9rem;
 
-    input {
-      flex: 1;
-      padding: 8px 12px;
-      border: 1px solid #374151;
-      background: #111827;
-      color: #f9fafb;
+    i {
+      font-size: 1.1rem;
+      color: #ffffff;
+      min-width: 20px;
     }
 
-    button {
-      padding: 8px 12px;
-      border: none;
-      background: #f59e0b;
-      color: #111827;
+    a {
+      color: #ffffff;
+      text-decoration: none;
+      transition: color 0.2s ease;
+
+      &:hover {
+        color: #ffd54f;
+        text-decoration: underline;
+      }
+    }
+  }
+
+  .social-icons {
+    display: flex;
+    gap: 12px;
+    margin-top: 16px;
+
+    .social-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      text-decoration: none;
+      transition: all 0.2s ease;
+
+      i {
+        font-size: 1.2rem;
+      }
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: translateY(-2px);
+      }
+    }
+  }
+
+  // Estilos para FORMAS DE PAGAMENTO
+  .payment-col {
+    grid-column: span 1;
+  }
+
+  .payment-section {
+    background: #000000;
+    padding: 16px;
+    border-radius: 8px;
+  }
+
+  .payment-label {
+    color: #ffffff;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .payment-methods-horizontal {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+    justify-content: flex-start;
+  }
+
+  .payment-card {
+    background: #ffffff;
+    border-radius: 6px;
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 80px;
+    height: 50px;
+    text-decoration: none;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .card-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+    }
+
+    .card-text {
+      font-size: 0.65rem;
       font-weight: 600;
-      cursor: pointer;
+      color: #333;
+      text-align: center;
+      line-height: 1.2;
     }
+
+    // American Express
+    &.amex {
+      background: #006fcf;
+      .card-text-top,
+      .card-text-bottom {
+        color: #ffffff;
+        font-size: 0.5rem;
+        font-weight: 700;
+        line-height: 1;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+      }
+      .card-text-top {
+        margin-bottom: 1px;
+      }
+    }
+
+    // Diners Club
+    &.diners {
+      background: #ffffff;
+      .diners-logo {
+        position: relative;
+        width: 24px;
+        height: 24px;
+        margin-bottom: 4px;
+      }
+      .diners-circle {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: #0079be;
+        border: 2px solid #0079be;
+        position: relative;
+        &::after {
+          content: '';
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: 12px;
+          height: 12px;
+          border-radius: 50%;
+          background: #ffffff;
+        }
+      }
+      .card-text {
+        color: #0079be;
+        font-size: 0.55rem;
+        font-weight: 700;
+      }
+    }
+
+    // Elo
+    &.elo {
+      background: #000000;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      padding: 0;
+      .card-text-elo {
+        color: #ffa500;
+        font-size: 0.9rem;
+        font-weight: 700;
+        font-style: italic;
+        text-transform: lowercase;
+      }
+    }
+
+    // Hipercard
+    &.hipercard {
+      background: #d52b1e;
+      .card-text {
+        color: #ffffff;
+        font-size: 0.7rem;
+        font-weight: 700;
+      }
+    }
+
+    // Mastercard
+    &.mastercard {
+      background: #ffffff;
+      .mastercard-circles {
+        position: relative;
+        width: 32px;
+        height: 20px;
+        margin-bottom: 4px;
+      }
+      .circle {
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        top: 0;
+      }
+      .circle-red {
+        left: 0;
+        background: #eb001b;
+      }
+      .circle-orange {
+        right: 0;
+        background: #f79e1b;
+        z-index: 1;
+      }
+      .card-text {
+        color: #000000;
+        font-size: 0.6rem;
+        font-weight: 600;
+      }
+    }
+
+    // Visa
+    &.visa {
+      background: #ffffff;
+      .visa-logo {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .visa-text {
+        color: #1a1f71;
+        font-size: 1rem;
+        font-weight: 700;
+        letter-spacing: 1px;
+        position: relative;
+        z-index: 2;
+      }
+      .visa-swoosh {
+        position: absolute;
+        top: -2px;
+        right: -4px;
+        width: 12px;
+        height: 8px;
+        background: linear-gradient(135deg, #ffa500 0%, #ffd700 100%);
+        border-radius: 0 4px 4px 0;
+        z-index: 1;
+      }
+    }
+  }
+
+  // Estilos para CERTIFICADOS
+  .certificado {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .ssl-badge {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 12px;
+    border-radius: 8px;
+  }
+
+  .ssl-icon {
+    width: 40px;
+    height: 40px;
+    background: #4caf50;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    i {
+      font-size: 1.5rem;
+      color: #ffffff;
+    }
+  }
+
+  .ssl-text {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .ssl-https {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #ffffff;
+  }
+
+  .ssl-check {
+    i {
+      font-size: 1rem;
+      color: #4caf50;
+    }
+  }
+
+  .ssl-desc {
+    font-size: 0.85rem;
+    color: #ffffff;
+    margin: 0;
+    line-height: 1.4;
   }
 
   .copy {
-    border-top: 1px solid #1f2937;
-    padding-top: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    padding-top: 16px;
     text-align: center;
-    font-size: 14px;
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.8);
   }
 }

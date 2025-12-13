@@ -25,6 +25,8 @@ export class CartService {
   // Carrinho do backend (para usuários autenticados)
   private readonly carrinhoBackend = signal<Carrinho | null>(null);
   private isSincronizando = false;
+  // Flag para indicar se o backend está disponível
+  private backendDisponivel = true;
 
   constructor() {
     // Observa mudanças no estado de autenticação usando effect()
@@ -41,10 +43,10 @@ export class CartService {
 
   /**
    * Obtém itens do carrinho
-   * Se autenticado, usa backend; senão, usa localStorage
+   * Se autenticado e backend disponível, usa backend; senão, usa localStorage
    */
   getItems(): CartItem[] {
-    if (this.auth.isAuthenticated() && this.carrinhoBackend()) {
+    if (this.auth.isAuthenticated() && this.backendDisponivel && this.carrinhoBackend()) {
       const itensBackend = this.carrinhoBackend()!.itens;
       return this.converterItensBackendParaCartItem(itensBackend);
     }
@@ -55,7 +57,7 @@ export class CartService {
    * Obtém quantidade total de itens
    */
   getCount(): number {
-    if (this.auth.isAuthenticated() && this.carrinhoBackend()) {
+    if (this.auth.isAuthenticated() && this.backendDisponivel && this.carrinhoBackend()) {
       return this.carrinhoBackend()!.quantidadeTotal;
     }
     return this.items.reduce((sum, it) => sum + it.quantity, 0);
@@ -88,7 +90,7 @@ export class CartService {
       throw new Error('Quantidade deve ser maior que zero');
     }
 
-    if (this.auth.isAuthenticated()) {
+    if (this.auth.isAuthenticated() && this.backendDisponivel) {
       // Usa backend
       try {
         const payload = {
@@ -96,11 +98,35 @@ export class CartService {
           quantidade: quantity,
         };
 
-        // Log removido
-
         await firstValueFrom(this.carrinhoService.adicionarItem(payload));
         await this.carregarCarrinhoBackend();
       } catch (error: any) {
+        // Verifica se é erro de conexão (backend não disponível)
+        const isConnectionError = 
+          error?.status === 0 || 
+          error?.status === undefined ||
+          error?.message?.includes('ERR_CONNECTION_REFUSED') ||
+          error?.message?.includes('Unknown Error');
+
+        if (isConnectionError) {
+          console.warn('⚠️ Backend não disponível, usando localStorage como fallback');
+          this.backendDisponivel = false;
+          // Fallback para localStorage
+          const idx = this.items.findIndex(
+            (x) => x.id === item.id && x.size === item.size
+          );
+          if (idx >= 0) {
+            this.items[idx] = {
+              ...this.items[idx],
+              quantity: this.items[idx].quantity + quantity,
+            };
+          } else {
+            this.items.push({ ...item, quantity });
+          }
+          this.saveToStorage();
+          return; // Sucesso com fallback
+        }
+
         console.error('❌ Erro ao adicionar item ao carrinho:', error);
         console.error('📋 Detalhes do erro:', {
           status: error?.status,
@@ -110,29 +136,20 @@ export class CartService {
         });
 
         // Propaga erro com mensagem do backend se disponível
-        // Tenta diferentes formatos de resposta de erro
         if (error?.error) {
-          // Erro de validação do Spring (MethodArgumentNotValidException)
           if (error.error.errors) {
             const errors = error.error.errors;
             const mensagens = Object.values(errors).join(', ');
             throw new Error(mensagens || 'Erro de validação');
-          }
-          // ErrorResponse padrão
-          else if (error.error.message) {
+          } else if (error.error.message) {
             throw new Error(error.error.message);
-          }
-          // String simples
-          else if (typeof error.error === 'string') {
+          } else if (typeof error.error === 'string') {
             throw new Error(error.error);
-          }
-          // Objeto com campo 'error'
-          else if (error.error.error) {
+          } else if (error.error.error) {
             throw new Error(error.error.error);
           }
         }
 
-        // Fallback para outros formatos
         if (error?.message) {
           throw new Error(error.message);
         }
@@ -166,7 +183,7 @@ export class CartService {
     quantity = 1,
     size?: string
   ): Promise<void> {
-    if (this.auth.isAuthenticated()) {
+    if (this.auth.isAuthenticated() && this.backendDisponivel) {
       // Busca item no backend
       const carrinho = this.carrinhoBackend();
       if (!carrinho) return;
@@ -185,7 +202,26 @@ export class CartService {
             })
           );
           await this.carregarCarrinhoBackend();
-        } catch (error) {
+        } catch (error: any) {
+          const isConnectionError = 
+            error?.status === 0 || 
+            error?.status === undefined ||
+            error?.message?.includes('ERR_CONNECTION_REFUSED');
+          
+          if (isConnectionError) {
+            this.backendDisponivel = false;
+            // Fallback para localStorage
+            const idx = this.items.findIndex((x) => x.id === id && x.size === size);
+            if (idx === -1) return;
+            const newQty = this.items[idx].quantity - quantity;
+            if (newQty > 0) {
+              this.items[idx] = { ...this.items[idx], quantity: newQty };
+            } else {
+              this.items.splice(idx, 1);
+            }
+            this.saveToStorage();
+            return;
+          }
           console.error('Erro ao atualizar item:', error);
         }
       } else {
@@ -209,7 +245,7 @@ export class CartService {
    * Remove item do carrinho
    */
   async remove(id: string | number, size?: string): Promise<void> {
-    if (this.auth.isAuthenticated()) {
+    if (this.auth.isAuthenticated() && this.backendDisponivel) {
       // Busca item no backend
       const carrinho = this.carrinhoBackend();
       if (!carrinho) return;
@@ -222,7 +258,19 @@ export class CartService {
       try {
         await firstValueFrom(this.carrinhoService.removerItem(itemBackend.id!));
         await this.carregarCarrinhoBackend();
-      } catch (error) {
+      } catch (error: any) {
+        const isConnectionError = 
+          error?.status === 0 || 
+          error?.status === undefined ||
+          error?.message?.includes('ERR_CONNECTION_REFUSED');
+        
+        if (isConnectionError) {
+          this.backendDisponivel = false;
+          // Fallback para localStorage
+          this.items = this.items.filter((x) => !(x.id === id && x.size === size));
+          this.saveToStorage();
+          return;
+        }
         console.error('Erro ao remover item:', error);
       }
     } else {
@@ -236,14 +284,22 @@ export class CartService {
    * Limpa o carrinho
    */
   async clear(): Promise<void> {
-    if (this.auth.isAuthenticated()) {
+    if (this.auth.isAuthenticated() && this.backendDisponivel) {
       try {
         await firstValueFrom(this.carrinhoService.limparCarrinho());
         await this.carregarCarrinhoBackend();
-        // Garante que o signal seja atualizado
         this.carrinhoBackend.set(null);
-      } catch (error) {
-        console.error('Erro ao limpar carrinho:', error);
+      } catch (error: any) {
+        const isConnectionError = 
+          error?.status === 0 || 
+          error?.status === undefined ||
+          error?.message?.includes('ERR_CONNECTION_REFUSED');
+        
+        if (isConnectionError) {
+          this.backendDisponivel = false;
+        } else {
+          console.error('Erro ao limpar carrinho:', error);
+        }
       }
     }
     // Sempre limpa localStorage também (para garantir)
@@ -255,19 +311,29 @@ export class CartService {
    * Carrega carrinho do backend
    */
   private async carregarCarrinhoBackend(): Promise<void> {
-    if (!this.auth.isAuthenticated()) return;
+    if (!this.auth.isAuthenticated() || !this.backendDisponivel) return;
 
     try {
       const carrinho = await firstValueFrom(
         this.carrinhoService.obterCarrinho()
       );
-      // Logs removidos para evitar poluição do console
       if (carrinho.itens && carrinho.itens.length > 0) {
-        // Logs removidos
+        // Carrinho carregado com sucesso
       }
       this.carrinhoBackend.set(carrinho);
-    } catch (error) {
-      console.error('Erro ao carregar carrinho:', error);
+      this.backendDisponivel = true; // Backend está funcionando
+    } catch (error: any) {
+      const isConnectionError = 
+        error?.status === 0 || 
+        error?.status === undefined ||
+        error?.message?.includes('ERR_CONNECTION_REFUSED');
+      
+      if (isConnectionError) {
+        console.warn('⚠️ Backend não disponível, usando localStorage');
+        this.backendDisponivel = false;
+      } else {
+        console.error('Erro ao carregar carrinho:', error);
+      }
     }
   }
 
@@ -279,8 +345,15 @@ export class CartService {
     this.isSincronizando = true;
 
     try {
-      // Carrega carrinho do backend
+      // Tenta carregar carrinho do backend
       await this.carregarCarrinhoBackend();
+
+      // Se backend não está disponível, mantém localStorage
+      if (!this.backendDisponivel) {
+        console.warn('⚠️ Backend não disponível, mantendo carrinho no localStorage');
+        this.isSincronizando = false;
+        return;
+      }
 
       // Se há itens no localStorage, migra para o backend
       if (this.items.length > 0) {
@@ -292,12 +365,23 @@ export class CartService {
                 quantidade: item.quantity,
               })
             );
-          } catch (error) {
+          } catch (error: any) {
+            const isConnectionError = 
+              error?.status === 0 || 
+              error?.status === undefined ||
+              error?.message?.includes('ERR_CONNECTION_REFUSED');
+            
+            if (isConnectionError) {
+              this.backendDisponivel = false;
+              console.warn('⚠️ Backend não disponível durante sincronização, mantendo localStorage');
+              this.isSincronizando = false;
+              return;
+            }
             console.error(`Erro ao migrar item ${item.id}:`, error);
           }
         }
 
-        // Limpa localStorage após migração
+        // Limpa localStorage após migração bem-sucedida
         this.items = [];
         this.saveToStorage();
 

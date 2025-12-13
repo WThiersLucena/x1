@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { IndicadoresVendasComponent } from './indicadores-vendas/indicadores-vendas.component';
 import { IndicadoresProdutosComponent } from './indicadores-produtos/indicadores-produtos.component';
 import { IndicadoresClientesComponent } from './indicadores-clientes/indicadores-clientes.component';
+import { IndicadoresEstoqueComponent } from './indicadores-estoque/indicadores-estoque.component';
 
 @Component({
   selector: 'app-dashboard',
@@ -12,6 +13,7 @@ import { IndicadoresClientesComponent } from './indicadores-clientes/indicadores
     IndicadoresVendasComponent,
     IndicadoresProdutosComponent,
     IndicadoresClientesComponent,
+    IndicadoresEstoqueComponent,
   ],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss',

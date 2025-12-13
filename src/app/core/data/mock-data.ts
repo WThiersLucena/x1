@@ -35,7 +35,7 @@ export const MOCK_USUARIOS: MockUsuario[] = [
   {
     id: 1,
     name: 'João Silva',
-    email: 'admin@casasanches.com',
+    email: 'thiers@adm.com',
     password: 'admin123',
     role: 'GESTOR',
     enderecos: [
@@ -63,6 +63,18 @@ export const MOCK_USUARIOS: MockUsuario[] = [
         estado: 'SP',
         tipo: TipoEndereco.COMERCIAL,
       },
+      {
+        id: 3,
+        usuarioId: 3,
+        cep: '01310-100',
+        logradouro: 'Avenida Paulista',
+        numero: '1578',
+        complemento: 'Sala 101',
+        bairro: 'Bela Vista',
+        cidade: 'São Paulo',
+        estado: 'SP',
+        tipo: TipoEndereco.RESIDENCIAL,
+      },
     ],
     telefones: [
       {
@@ -78,6 +90,13 @@ export const MOCK_USUARIOS: MockUsuario[] = [
         ddd: '11',
         numero: '3256-7890',
         tipo: TipoTelefone.COMERCIAL,
+      },
+      {
+        id: 3,
+        usuarioId: 3,
+        ddd: '11',
+        numero: '98765-4321',
+        tipo: TipoTelefone.CELULAR,
       },
     ],
   },
@@ -581,9 +600,9 @@ export const MOCK_PRODUTOS: Produto[] = [
     categoriaNome: 'Vestuário',
     fornecedorId: 1,
     fornecedorNome: 'Fornecedor Premium Ltda',
-    custoUnitario: 25.00,
-    precoDe: 59.90,
-    precoVenda: 49.90,
+    custoUnitario: 25.0,
+    precoDe: 59.9,
+    precoVenda: 49.9,
     estoqueAtual: 50,
     unidadeMedida: 'UNIDADE',
     maisVendido: true,
@@ -613,9 +632,9 @@ export const MOCK_PRODUTOS: Produto[] = [
     categoriaNome: 'Vestuário',
     fornecedorId: 2,
     fornecedorNome: 'Moda Fashion S.A.',
-    custoUnitario: 35.00,
-    precoDe: 89.90,
-    precoVenda: 69.90,
+    custoUnitario: 35.0,
+    precoDe: 89.9,
+    precoVenda: 69.9,
     estoqueAtual: 30,
     unidadeMedida: 'UNIDADE',
     maisVendido: true,
@@ -645,9 +664,9 @@ export const MOCK_PRODUTOS: Produto[] = [
     categoriaNome: 'Acessórios',
     fornecedorId: 4,
     fornecedorNome: 'Acessórios Elegantes',
-    custoUnitario: 800.00,
-    precoDe: 1999.90,
-    precoVenda: 1599.90,
+    custoUnitario: 800.0,
+    precoDe: 1999.9,
+    precoVenda: 1599.9,
     estoqueAtual: 5,
     unidadeMedida: 'UNIDADE',
     maisVendido: true,
@@ -677,9 +696,9 @@ export const MOCK_PRODUTOS: Produto[] = [
     categoriaNome: 'Papelaria',
     fornecedorId: 5,
     fornecedorNome: 'Papelaria Moderna',
-    custoUnitario: 8.00,
-    precoDe: 29.90,
-    precoVenda: 19.90,
+    custoUnitario: 8.0,
+    precoDe: 29.9,
+    precoVenda: 19.9,
     estoqueAtual: 100,
     unidadeMedida: 'UNIDADE',
     ativo: true,
@@ -708,9 +727,9 @@ export const MOCK_PRODUTOS: Produto[] = [
     categoriaNome: 'Calçados',
     fornecedorId: 6,
     fornecedorNome: 'Calçados Conforto',
-    custoUnitario: 80.00,
-    precoDe: 199.90,
-    precoVenda: 149.90,
+    custoUnitario: 80.0,
+    precoDe: 199.9,
+    precoVenda: 149.9,
     estoqueAtual: 25,
     unidadeMedida: 'UNIDADE',
     ativo: true,
@@ -739,9 +758,9 @@ export const MOCK_PRODUTOS: Produto[] = [
     categoriaNome: 'Vestuário',
     fornecedorId: 1,
     fornecedorNome: 'Fornecedor Premium Ltda',
-    custoUnitario: 55.00,
-    precoDe: 169.90,
-    precoVenda: 119.90,
+    custoUnitario: 55.0,
+    precoDe: 169.9,
+    precoVenda: 119.9,
     estoqueAtual: 18,
     unidadeMedida: 'UNIDADE',
     promocao: true,
@@ -776,9 +795,9 @@ export const MOCK_PRODUTOS: Produto[] = [
     categoriaNome: 'Vestuário',
     fornecedorId: 2,
     fornecedorNome: 'Moda Fashion S.A.',
-    custoUnitario: 50.00,
-    precoDe: 159.90,
-    precoVenda: 109.90,
+    custoUnitario: 50.0,
+    precoDe: 159.9,
+    precoVenda: 109.9,
     estoqueAtual: 15,
     unidadeMedida: 'UNIDADE',
     promocao: true,
@@ -808,9 +827,9 @@ export const MOCK_PRODUTOS: Produto[] = [
     categoriaNome: 'Calçados',
     fornecedorId: 6,
     fornecedorNome: 'Calçados Conforto',
-    custoUnitario: 120.00,
-    precoDe: 299.90,
-    precoVenda: 229.90,
+    custoUnitario: 120.0,
+    precoDe: 299.9,
+    precoVenda: 229.9,
     estoqueAtual: 12,
     unidadeMedida: 'UNIDADE',
     ativo: true,
@@ -854,9 +873,8 @@ export function buscarUsuarioMockado(
   password: string
 ): MockUsuario | null {
   return (
-    MOCK_USUARIOS.find(
-      (u) => u.email === email && u.password === password
-    ) || null
+    MOCK_USUARIOS.find((u) => u.email === email && u.password === password) ||
+    null
   );
 }
 
@@ -866,4 +884,3 @@ export function buscarUsuarioMockado(
 export function buscarUsuarioPorId(id: number): MockUsuario | null {
   return MOCK_USUARIOS.find((u) => u.id === id) || null;
 }
-

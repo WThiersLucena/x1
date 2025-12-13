@@ -1,28 +1,133 @@
 <footer class="site-footer">
   <div class="container">
-    <div class="cols">
-      <div class="col">
-        <h4>My Account</h4>
+    <div class="footer-content">
+      <!-- CONTATOS -->
+      <div class="footer-col">
+        <h4>CONTATOS</h4>
+        <p class="horario">
+          NOSSO HORÁRIO DE ATENDIMENTO É DE SEG.: À SEX.: DAS 9H ÀS 17H30.
+        </p>
+        <div class="contato-item">
+          <i class="bi bi-whatsapp"></i>
+          <a routerLink="/home">(11) 98253-9200</a>
+        </div>
+        <div class="contato-item">
+          <i class="bi bi-telephone"></i>
+          <a routerLink="/home">(11) 98253-9200</a>
+        </div>
+        <div class="contato-item">
+          <i class="bi bi-envelope"></i>
+          <a routerLink="/home">suaEmpresa.com.br</a>
+        </div>
+        <div class="social-icons">
+          <a routerLink="/home" class="social-icon" title="YouTube">
+            <i class="bi bi-youtube"></i>
+          </a>
+          <a routerLink="/home" class="social-icon" title="Instagram">
+            <i class="bi bi-instagram"></i>
+          </a>
+        </div>
+      </div>
+
+      <!-- PÁGINAS -->
+      <div class="footer-col">
+        <h4>PÁGINAS</h4>
         <ul>
-          <li><a routerLink="/contact">Contact Us</a></li>
-          <li><a routerLink="/faq">F.A.Q</a></li>
-          <li><a routerLink="/account">My Account</a></li>
+          <li><a routerLink="/home">CONTATO</a></li>
+          <li><a routerLink="/home">CONDIÇÕES DE ENTREGA</a></li>
+          <li><a routerLink="/home">DÚVIDAS FREQUENTES</a></li>
+          <li><a routerLink="/home">FORMAS DE PAGAMENTO</a></li>
+          <li><a routerLink="/home">POLÍTICA DE PRIVACIDADE</a></li>
+          <li><a routerLink="/home">SOBRE NÓS</a></li>
+          <li><a routerLink="/home">TERMOS DE SERVIÇO</a></li>
+          <li><a routerLink="/home">TROCAS E DEVOLUÇÕES</a></li>
+          <li><a routerLink="/home">BLOG</a></li>
         </ul>
       </div>
-      <div class="col">
-        <h4>Information</h4>
+
+      <!-- CATEGORIAS -->
+      <div class="footer-col">
+        <h4>CATEGORIAS</h4>
         <ul>
-          <li><a routerLink="/about">About Us</a></li>
-          <li><a routerLink="/privacy">Privacy Policy</a></li>
-          <li><a routerLink="/terms">Terms & Conditions</a></li>
+          <li><a routerLink="/home">CAFÉS</a></li>
+          <li><a routerLink="/home">CAFETEIRAS E MÉTODOS</a></li>
+          <li><a routerLink="/home">ACESSÓRIOS</a></li>
+          <li><a routerLink="/home">MOEDORES</a></li>
+          <li><a routerLink="/home">FILTROS E SUPRIMENTOS</a></li>
+          <li><a routerLink="/home">OUTRAS BEBIDAS</a></li>
+          <li><a routerLink="/home">KITS E PRESENTES</a></li>
+          <li><a routerLink="/home">PROMOÇÕES</a></li>
         </ul>
       </div>
-      <div class="col">
-        <h4>Subscribe</h4>
-        <form class="newsletter" (submit)="$event.preventDefault()">
-          <input type="email" placeholder="Email address" aria-label="Email" />
-          <button type="submit">Subscribe</button>
-        </form>
+
+      <!-- FORMAS DE PAGAMENTO -->
+      <div class="footer-col payment-col">
+        <h4>FORMAS DE PAGAMENTO</h4>
+        <div class="payment-section">
+          <div class="payment-label">PAGUE COM</div>
+          <div class="payment-methods-horizontal">
+            <a routerLink="/home" class="payment-card amex">
+              <div class="card-content">
+                <div class="card-text-top">AMERICAN</div>
+                <div class="card-text-bottom">EXPRESS</div>
+              </div>
+            </a>
+            <a routerLink="/home" class="payment-card diners">
+              <div class="card-content">
+                <div class="diners-logo">
+                  <div class="diners-circle"></div>
+                </div>
+                <div class="card-text">Diners Club</div>
+              </div>
+            </a>
+            <a routerLink="/home" class="payment-card elo">
+              <div class="card-content">
+                <div class="card-text-elo">elo</div>
+              </div>
+            </a>
+            <a routerLink="/home" class="payment-card hipercard">
+              <div class="card-content">
+                <div class="card-text">Hipercard</div>
+              </div>
+            </a>
+            <a routerLink="/home" class="payment-card mastercard">
+              <div class="card-content">
+                <div class="mastercard-circles">
+                  <div class="circle circle-red"></div>
+                  <div class="circle circle-orange"></div>
+                </div>
+                <div class="card-text">Mastercard</div>
+              </div>
+            </a>
+            <a routerLink="/home" class="payment-card visa">
+              <div class="card-content">
+                <div class="visa-logo">
+                  <span class="visa-text">VISA</span>
+                  <div class="visa-swoosh"></div>
+                </div>
+              </div>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- CERTIFICADOS -->
+      <div class="footer-col">
+        <h4>CERTIFICADOS</h4>
+        <div class="certificado">
+          <div class="ssl-badge">
+            <div class="ssl-icon">
+              <i class="bi bi-shield-check"></i>
+            </div>
+            <div class="ssl-text">
+              <div class="ssl-https">https</div>
+              <div class="ssl-check">
+                <i class="bi bi-check-circle"></i>
+              </div>
+            </div>
+          </div>
+          <p class="ssl-desc">Conexão Segura</p>
+        </div>
       </div>
     </div>
     <div class="copy">Thiers© 2025. All rights reserved.</div>
